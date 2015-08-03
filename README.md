@@ -1,41 +1,71 @@
 # ConfigMapper
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/config_mapper`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'config_mapper'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install config_mapper
+ConfigMapper maps configuration data onto Ruby objects.
 
 ## Usage
 
-TODO: Write usage instructions here
+Imagine you have some Ruby objects:
 
-## Development
+    class Position
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake rspec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+      attr_reader :x
+      attr_reader :y
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+      def x=(arg); @x = Integer(arg); end
+      def y=(arg); @y = Integer(arg); end
 
-## Contributing
+    end
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/config_mapper.
+    class State
 
+      def initialize
+        @position = Position.new
+      end
+
+      attr_reader :position
+      attr_accessor :orientation
+
+    end
+
+    state = State.new
+
+and wish to populate/modify it, based on plain data:
+
+    config_data = {
+      "orientation" => "North",
+      "position" => {
+        "x" => 2,
+        "y" => 4
+      }
+    }
+
+ConfigMapper will help you out:
+
+    require 'config_mapper'
+
+    errors = ConfigMapper.set(config_data, state)
+    state.orientation             #=> "North"
+    state.position.x              #=> 2
+
+### Errors
+
+`ConfigMapper.set` returns a Hash of errors encountered while mapping data
+onto objects.  The errors are Exceptions (typically ArgumentError or NoMethodError),
+keyed by a dot-delimited path to the offending data.  e.g.
+
+    config_data = {
+      "position" => {
+        "bogus" => "flibble"
+      }
+    }
+
+    errors = ConfigMapper.set(config_data, state)
+    errors    #=> { "position.bogus" => #<NoMethodError> }
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
 
+## Contributing
+
+It's on GitHub; you know the drill.
