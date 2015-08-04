@@ -6,59 +6,67 @@ ConfigMapper maps configuration data onto Ruby objects.
 
 Imagine you have some Ruby objects:
 
-    class Position
+```ruby
+class Position
 
-      attr_reader :x
-      attr_reader :y
+  attr_reader :x
+  attr_reader :y
 
-      def x=(arg); @x = Integer(arg); end
-      def y=(arg); @y = Integer(arg); end
+  def x=(arg); @x = Integer(arg); end
+  def y=(arg); @y = Integer(arg); end
 
-    end
+end
 
-    class State
+class State
 
-      def initialize
-        @position = Position.new
-      end
+  def initialize
+	@position = Position.new
+  end
 
-      attr_reader :position
-      attr_accessor :orientation
+  attr_reader :position
+  attr_accessor :orientation
 
-    end
+end
 
-    state = State.new
+state = State.new
+```
 
 and wish to populate/modify it, based on plain data:
 
-    config_data = {
-      "orientation" => "North",
-      "position" => {
-        "x" => 2,
-        "y" => 4
-      }
-    }
+```ruby
+config_data = {
+  "orientation" => "North",
+  "position" => {
+	"x" => 2,
+	"y" => 4
+  }
+}
+```
 
 ConfigMapper will help you out:
 
-    require 'config_mapper'
+```ruby
+require 'config_mapper'
 
-    errors = ConfigMapper.set(config_data, state)
-    state.orientation              #=> "North"
-    state.position.x               #=> 2
+errors = ConfigMapper.set(config_data, state)
+state.orientation              #=> "North"
+state.position.x               #=> 2
+```
 
 It can even populate Hashes of objects, e.g.
 
-    positions = Hash.new { |h,k| h[k] = Position.new }
+```ruby
+positions = Hash.new { |h,k| h[k] = Position.new }
 
-    config_data = {
-      "fred" => { "x" => 2, "y" => 4 },
-      "mary" => { "x" => 3, "y" => 5 }
-    }
+config_data = {
+  "fred" => { "x" => 2, "y" => 4 },
+  "mary" => { "x" => 3, "y" => 5 }
+}
 
-    ConfigMapper.set(config_data, positions)
-    positions["fred"].x            #=> 2
-    positions["mary"].y            #=> 5
+ConfigMapper.set(config_data, positions)
+positions["fred"].x            #=> 2
+positions["mary"].y            #=> 5
+```
 
 ### Errors
 
@@ -66,14 +74,16 @@ It can even populate Hashes of objects, e.g.
 onto objects.  The errors are Exceptions (typically ArgumentError or NoMethodError),
 keyed by a dot-delimited path to the offending data.  e.g.
 
-    config_data = {
-      "position" => {
-        "bogus" => "flibble"
-      }
-    }
+```ruby
+config_data = {
+  "position" => {
+	"bogus" => "flibble"
+  }
+}
 
-    errors = ConfigMapper.set(config_data, state)
-    errors    #=> { "position.bogus" => #<NoMethodError> }
+errors = ConfigMapper.set(config_data, state)
+errors    #=> { "position.bogus" => #<NoMethodError> }
+```
 
 ## License
 
