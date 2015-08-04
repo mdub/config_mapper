@@ -32,8 +32,6 @@ end
 
 describe ConfigMapper do
 
-  let(:target) { Testy::Position.new }
-
   subject(:mapper) { described_class.new(target) }
 
   describe ".set" do
@@ -41,6 +39,9 @@ describe ConfigMapper do
     let!(:errors) { described_class.set(source_hash, target) }
 
     context "with a simple Hash" do
+
+      let(:position) { Testy::Position.new }
+      let(:target) { position }
 
       let(:source_hash) do
         {
@@ -51,7 +52,7 @@ describe ConfigMapper do
       end
 
       it "sets recognised attributes" do
-        expect(target.x).to eql(1)
+        expect(position.x).to eql(1)
       end
 
       it "records ArgumentErrors raised by setter-methods" do
@@ -66,28 +67,24 @@ describe ConfigMapper do
 
     context "with a nested Hash" do
 
-      let(:target) { Testy::State.new }
+      let(:state) { Testy::State.new }
+      let(:target) { state }
 
       let(:source_hash) do
         {
           "position" => {
             "x" => 1,
             "y" => "juan"
-          },
-          "inclination" => "vertical"
+          }
         }
       end
 
       it "sets recognised attributes" do
-        expect(target.position.x).to eql(1)
+        expect(state.position.x).to eql(1)
       end
 
       it "records errors raised by nested objects" do
         expect(errors["position.y"]).to be_a(ArgumentError)
-      end
-
-      it "records errors for unrecognised keys" do
-        expect(errors["inclination"]).to be_a(NoMethodError)
       end
 
     end
