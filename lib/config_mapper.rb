@@ -19,7 +19,7 @@ class ConfigMapper
   end
 
   def initialize(target, errors = {})
-    @target = target
+    @target = ObjectAsHash[target]
     @errors = errors
   end
 
@@ -39,20 +39,39 @@ class ConfigMapper
   # Set a single attribute.
   #
   def set_attribute(key, value)
-    if value.is_a?(Hash)
-      set_nested(key, value)
+    if value.is_a?(Hash) && !target[key].nil?
+      nested_errors = ErrorProxy.new(errors, "#{key}.")
+      nested_mapper = self.class.new(target[key], nested_errors)
+      nested_mapper.set_attributes(value)
     else
-      target.public_send("#{key}=", value)
+      target[key] = value
     end
   rescue NoMethodError, ArgumentError => e
     errors[key] = e
   end
 
-  def set_nested(key, value)
-    nested_target = target.public_send(key)
-    nested_errors = ErrorProxy.new(errors, "#{key}.")
-    nested_mapper = self.class.new(nested_target, nested_errors)
-    nested_mapper.set_attributes(value)
+  class ObjectAsHash
+
+    def self.[](target)
+      if target.is_a?(Hash)
+        target
+      else
+        ObjectAsHash.new(target)
+      end
+    end
+
+    def initialize(target)
+      @target = target
+    end
+
+    def [](key)
+      @target.public_send(key)
+    end
+
+    def []=(key, value)
+      @target.public_send("#{key}=", value)
+    end
+
   end
 
   # Wraps a Hash of errors, injecting prefixes

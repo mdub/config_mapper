@@ -89,6 +89,49 @@ describe ConfigMapper do
 
     end
 
+    context "when the target is a Hash" do
+
+      let(:source_hash) do
+        {
+          "stan" => { "x" => 1, "y" => 2 },
+          "mary" => { "x" => 5, "y" => 6, "attitude" => "unknown" },
+        }
+      end
+
+      context "and contains an entry for the key" do
+
+        let(:positions) do
+          Hash.new do |h,k|
+            h[k] = Testy::Position.new
+          end
+        end
+        let(:target) { positions }
+
+        it "maps onto the object found" do
+          expect(positions["stan"].x).to eq(1)
+        end
+
+        it "records errors raised by nested objects" do
+          expect(errors["mary.attitude"]).to be_a(NoMethodError)
+        end
+
+      end
+
+      context "and doesn't contain an entry for the key" do
+
+        let(:positions) do
+          Hash.new
+        end
+        let(:target) { positions }
+
+        it "injects the Hash of data" do
+          expect(positions["stan"]).to eq({ "x" => 1, "y" => 2 })
+        end
+
+      end
+
+    end
+
   end
 
 end
