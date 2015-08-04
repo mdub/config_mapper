@@ -44,8 +44,21 @@ ConfigMapper will help you out:
     require 'config_mapper'
 
     errors = ConfigMapper.set(config_data, state)
-    state.orientation             #=> "North"
-    state.position.x              #=> 2
+    state.orientation              #=> "North"
+    state.position.x               #=> 2
+
+It can even populate Hashes of objects, e.g.
+
+    positions = Hash.new { |h,k| h[k] = Position.new }
+
+    config_data = {
+      "fred" => { "x" => 2, "y" => 4 },
+      "mary" => { "x" => 3, "y" => 5 }
+    }
+
+    ConfigMapper.set(config_data, positions)
+    positions["fred"].x            #=> 2
+    positions["mary"].y            #=> 5
 
 ### Errors
 
