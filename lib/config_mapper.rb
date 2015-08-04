@@ -55,6 +55,8 @@ class ConfigMapper
     nested_mapper.set_attributes(value)
   end
 
+  # Wraps a Hash of errors, injecting prefixes
+  #
   class ErrorProxy
 
     def initialize(errors, prefix)
