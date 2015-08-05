@@ -27,14 +27,14 @@ module ConfigMapper
     #
     def set_attribute(key, value)
       if value.is_a?(Hash) && !target[key].nil?
-        nested_errors = ErrorProxy.new(errors, "#{key}.")
+        nested_errors = ErrorProxy.new(errors, [key])
         nested_mapper = self.class.new(target[key], nested_errors)
         nested_mapper.set_attributes(value)
       else
         target[key] = value
       end
     rescue NoMethodError, ArgumentError => e
-      errors[key] = e
+      errors[[key]] = e
     end
 
   end

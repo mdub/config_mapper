@@ -60,11 +60,11 @@ describe ConfigMapper do
       end
 
       it "records ArgumentErrors raised by setter-methods" do
-        expect(errors["y"]).to be_a(ArgumentError)
+        expect(errors[%w(y)]).to be_a(ArgumentError)
       end
 
       it "records NoMethodErrors for unrecognised keys" do
-        expect(errors["z"]).to be_a(NoMethodError)
+        expect(errors[%w(z)]).to be_a(NoMethodError)
       end
 
     end
@@ -88,7 +88,7 @@ describe ConfigMapper do
       end
 
       it "records errors raised by nested objects" do
-        expect(errors["position.y"]).to be_a(ArgumentError)
+        expect(errors[%w(position y)]).to be_a(ArgumentError)
       end
 
     end
@@ -137,7 +137,7 @@ describe ConfigMapper do
         end
 
         it "records errors raised by nested objects" do
-          expect(errors["mary.attitude"]).to be_a(NoMethodError)
+          expect(errors[%w(mary attitude)]).to be_a(NoMethodError)
         end
 
       end
