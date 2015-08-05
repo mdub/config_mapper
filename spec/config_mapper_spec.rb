@@ -38,8 +38,6 @@ end
 
 describe ConfigMapper do
 
-  subject(:mapper) { described_class.new(target) }
-
   describe ".set" do
 
     let!(:errors) { described_class.set(source_data, target) }

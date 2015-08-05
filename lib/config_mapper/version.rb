@@ -1,4 +1,4 @@
-class ConfigMapper
+module ConfigMapper
 
   VERSION = "0.2.0"
 
