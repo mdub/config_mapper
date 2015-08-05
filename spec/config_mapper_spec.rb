@@ -28,6 +28,12 @@ module Testy
 
   end
 
+  class ThingWithSubnets
+
+    attr_accessor :subnets
+
+  end
+
 end
 
 describe ConfigMapper do
@@ -36,14 +42,14 @@ describe ConfigMapper do
 
   describe ".set" do
 
-    let!(:errors) { described_class.set(source_hash, target) }
+    let!(:errors) { described_class.set(source_data, target) }
 
     context "with a simple Hash" do
 
       let(:position) { Testy::Position.new }
       let(:target) { position }
 
-      let(:source_hash) do
+      let(:source_data) do
         {
           "x" => 1,
           "y" => "juan",
@@ -70,7 +76,7 @@ describe ConfigMapper do
       let(:state) { Testy::State.new }
       let(:target) { state }
 
-      let(:source_hash) do
+      let(:source_data) do
         {
           "position" => {
             "x" => 1,
@@ -89,9 +95,30 @@ describe ConfigMapper do
 
     end
 
+    context "with an Array of values" do
+
+      let(:thing) { Testy::ThingWithSubnets.new }
+      let(:target) { thing }
+
+      let(:source_data) do
+        {
+          :subnets => [
+            "subnet-1",
+            "subnet-2"
+          ]
+        }
+      end
+
+      it "sets the Array value" do
+        expect(thing.subnets).to eql(%w(subnet-1 subnet-2))
+      end
+
+    end
+
+
     context "when the target is a Hash" do
 
-      let(:source_hash) do
+      let(:source_data) do
         {
           "stan" => { "x" => 1, "y" => 2 },
           "mary" => { "x" => 5, "y" => 6, "attitude" => "unknown" },
