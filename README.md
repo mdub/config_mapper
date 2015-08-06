@@ -72,17 +72,17 @@ positions["mary"].y            #=> 5
 
 `ConfigMapper.set` returns a Hash of errors encountered while mapping data
 onto objects.  The errors are Exceptions (typically ArgumentError or NoMethodError),
-keyed by a dot-delimited path to the offending data.  e.g.
+keyed by a Array representing the path to the offending data.  e.g.
 
 ```ruby
 config_data = {
   "position" => {
-	"bogus" => "flibble"
+    "bogus" => "flibble"
   }
 }
 
 errors = ConfigMapper.set(config_data, state)
-errors    #=> { "position.bogus" => #<NoMethodError> }
+errors    #=> { ["position", "bogus"] => #<NoMethodError> }
 ```
 
 ## License
