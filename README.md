@@ -20,7 +20,7 @@ end
 class State
 
   def initialize
-	@position = Position.new
+    @position = Position.new
   end
 
   attr_reader :position
@@ -37,8 +37,8 @@ and wish to populate/modify it, based on plain data:
 config_data = {
   "orientation" => "North",
   "position" => {
-	"x" => 2,
-	"y" => 4
+    "x" => 2,
+    "y" => 4
   }
 }
 ```
@@ -67,6 +67,30 @@ ConfigMapper.set(config_data, positions)
 positions["fred"].x            #=> 2
 positions["mary"].y            #=> 5
 ```
+
+### Target object
+
+Given
+
+```ruby
+ConfigMapper.set(config_data, config_target)
+```
+
+the `config_target` object is expected provide accessor-methods corresponding
+to the attributes that you want to make configurable.  For example, with:
+
+```ruby
+config_data = {
+  "orientation" => "North",
+  "position" => { "x" => 2, "y" => 4 }
+}
+```
+
+it should have a `orientiation=` method, and a `position` method that
+returns a `Position` object, which should in turn have `x=` and `y=`
+methods.
+
+ConfigMapper cannot and will not _create_ objects for you.
 
 ### Errors
 
