@@ -92,3 +92,8 @@ The gem is available as open source under the terms of the [MIT License](http://
 ## Contributing
 
 It's on GitHub; you know the drill.
+
+## See also
+
+* [ConfigHound](https://github.com/mdub/config_hound) is a great way to
+  load raw config-data, before throwing it to ConfigMapper.
