@@ -21,6 +21,8 @@ module ConfigMapper
       #
       def attribute(name, type = nil, options = {}, &coerce_block)
 
+        name = name.to_sym
+
         # Handle optional "type" argument
         if options.empty? && type.kind_of?(Hash)
           options = type
@@ -30,7 +32,11 @@ module ConfigMapper
           coerce_block = method(type)
         end
 
-        defaults[name] = options[:default].freeze
+        if options.key?(:default)
+          defaults[name] = options.fetch(:default).freeze
+        else
+          required_attributes << name
+        end
 
         attr_accessor(name)
 
@@ -40,6 +46,10 @@ module ConfigMapper
           end
         end
 
+      end
+
+      def required_attributes
+        @required_attributes ||= []
       end
 
       def defaults
@@ -66,6 +76,12 @@ module ConfigMapper
       self.class.components.each do |name, component_class|
         instance_variable_set("@#{name}", component_class.new)
       end
+    end
+
+    def unset_attributes
+      self.class.required_attributes.reject { |name|
+        instance_variable_defined?("@#{name}")
+      }.map(&:to_s)
     end
 
   end
