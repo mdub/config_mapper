@@ -6,6 +6,22 @@ module ConfigMapper
 
     class << self
 
+      # Defines reader and writer methods for the specified attribute.
+      #
+      # A `:default` value may be specified; otherwise, the attribute is
+      # considered mandatory.
+      #
+      # If a block is provided, it will invoked in the writer-method to
+      # validate the argument.
+      #
+      the writer-method will invoke it with the
+      # new attribute value.
+      #
+      # @param name [Symbol] attribute name
+      # @param type [Symbol] name of type-coercion method
+      # @options options [String] :default (nil) default value
+      # @yield type-coercion block
+      #
       def property(name, type = nil, options = {}, &coerce_block)
 
         # Handle optional "type" argument
@@ -33,6 +49,8 @@ module ConfigMapper
         @defaults ||= {}
       end
 
+      # Defines a sub-component.
+      #
       def component(name, &block)
         components[name] = Class.new(ConfigStruct, &block)
         attr_reader name
