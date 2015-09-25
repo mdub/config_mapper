@@ -15,7 +15,7 @@ module ConfigMapper
         coerce_block = method(type)
       end
 
-      defaults[name] = options[:default]
+      defaults[name] = options[:default].freeze
 
       attr_accessor(name)
 
