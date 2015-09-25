@@ -14,9 +14,6 @@ module ConfigMapper
       # If a block is provided, it will invoked in the writer-method to
       # validate the argument.
       #
-      the writer-method will invoke it with the
-      # new attribute value.
-      #
       # @param name [Symbol] attribute name
       # @param type [Symbol] name of type-coercion method
       # @options options [String] :default (nil) default value
