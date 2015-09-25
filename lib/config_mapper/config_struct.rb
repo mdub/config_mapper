@@ -48,20 +48,20 @@ module ConfigMapper
 
       end
 
-      def required_attributes
-        @required_attributes ||= []
-      end
-
-      def defaults
-        @defaults ||= {}
-      end
-
       # Defines a sub-component.
       #
       def component(name, &block)
         name = name.to_sym
         components[name] = Class.new(self, &block)
         attr_reader name
+      end
+
+      def required_attributes
+        @required_attributes ||= []
+      end
+
+      def defaults
+        @defaults ||= {}
       end
 
       def components
