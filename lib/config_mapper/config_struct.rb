@@ -59,6 +59,7 @@ module ConfigMapper
       # Defines a sub-component.
       #
       def component(name, &block)
+        name = name.to_sym
         components[name] = Class.new(self, &block)
         attr_reader name
       end
@@ -79,9 +80,25 @@ module ConfigMapper
     end
 
     def unset_attributes
-      self.class.required_attributes.reject { |name|
+      result = self.class.required_attributes.reject { |name|
         instance_variable_defined?("@#{name}")
       }.map(&:to_s)
+      components.each do |component_name, value|
+        result += value.unset_attributes.map do |name|
+          "#{component_name}.#{name}"
+        end
+      end
+      result
+    end
+
+    private
+
+    def components
+      {}.tap do |result|
+        self.class.components.each do |name, _|
+          result[name] = instance_variable_get("@#{name}")
+        end
+      end
     end
 
   end

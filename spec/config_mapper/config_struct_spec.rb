@@ -102,10 +102,17 @@ describe ConfigMapper::ConfigStruct do
       attribute :foo
       attribute :bar
       attribute :baz, :default => nil
+      component :position do
+        attribute :x
+      end
     end
 
     it "includes attributes that haven't been set" do
       expect(target.unset_attributes).to include("foo")
+    end
+
+    it "includes component attributes that haven't been set" do
+      expect(target.unset_attributes).to include("position.x")
     end
 
     it "excludes attributes that have been set" do
