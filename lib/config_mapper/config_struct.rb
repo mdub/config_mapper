@@ -4,11 +4,20 @@ module ConfigMapper
   #
   class ConfigStruct
 
-    def self.property(name, options = {}, &coerce_block)
+    def self.property(name, type = nil, options = {}, &coerce_block)
 
-      attr_accessor(name)
+      # Handle optional "type" argument
+      if options.empty? && type.kind_of?(Hash)
+        options = type
+        type = nil
+      end
+      if type
+        coerce_block = method(type)
+      end
 
       defaults[name] = options[:default]
+
+      attr_accessor(name)
 
       if coerce_block
         define_method("#{name}=") do |arg|
