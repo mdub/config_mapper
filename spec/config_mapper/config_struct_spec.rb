@@ -40,6 +40,23 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
+    context "with a default" do
+
+      with_target_class do
+        property :port, :default => 5000
+      end
+
+      it "defaults to the specified value" do
+        expect(target.port).to eql(5000)
+      end
+
+      it "allows override of default" do
+        target.port = 456
+        expect(target.port).to eql(456)
+      end
+
+    end
+
   end
 
 end
