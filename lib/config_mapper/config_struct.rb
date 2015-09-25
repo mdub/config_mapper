@@ -33,11 +33,23 @@ module ConfigMapper
         @defaults ||= {}
       end
 
+      def component(name, &block)
+        components[name] = Class.new(ConfigStruct, &block)
+        attr_reader name
+      end
+
+      def components
+        @components ||= {}
+      end
+
     end
 
     def initialize
       self.class.defaults.each do |name, value|
         instance_variable_set("@#{name}", value)
+      end
+      self.class.components.each do |name, component_class|
+        instance_variable_set("@#{name}", component_class.new)
       end
     end
 

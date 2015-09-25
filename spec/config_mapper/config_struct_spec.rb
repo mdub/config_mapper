@@ -76,4 +76,24 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
+  describe ".component" do
+
+    with_target_class do
+      component :position do
+        property :x
+        property :y
+      end
+    end
+
+    it "creates a sub-structure" do
+      expect(target.position).to be_kind_of(ConfigMapper::ConfigStruct)
+    end
+
+    it "maintains component state" do
+      target.position.x = 42
+      expect(target.position.x).to eql(42)
+    end
+
+  end
+
 end
