@@ -2,21 +2,15 @@ require "config_mapper/config_struct"
 
 describe ConfigMapper::ConfigStruct do
 
-  class MyConfig < ConfigMapper::ConfigStruct
-
-    property :name
-
-  end
-
-  class MyConfigWithABlock < ConfigMapper::ConfigStruct
-
-    property(:size) { |arg| Integer(arg) }
-
-  end
+  let(:target) { target_class.new }
 
   describe ".property" do
 
-    let(:target) { MyConfig.new }
+    let(:target_class) do
+      Class.new(ConfigMapper::ConfigStruct) do
+        property :name
+      end
+    end
 
     it "defines accessor methods" do
       target.name = "bob"
@@ -25,7 +19,11 @@ describe ConfigMapper::ConfigStruct do
 
     context "with a block" do
 
-      let(:target) { MyConfigWithABlock.new }
+      let(:target_class) do
+        Class.new(ConfigMapper::ConfigStruct) do
+          property(:size) { |arg| Integer(arg) }
+        end
+      end
 
       it "uses the block to check the value" do
         expect { target.size = "abc" }.to raise_error(ArgumentError)
