@@ -49,7 +49,7 @@ module ConfigMapper
       # Defines a sub-component.
       #
       def component(name, &block)
-        components[name] = Class.new(ConfigStruct, &block)
+        components[name] = Class.new(self, &block)
         attr_reader name
       end
 
