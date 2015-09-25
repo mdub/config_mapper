@@ -19,7 +19,7 @@ module ConfigMapper
       # @options options [String] :default (nil) default value
       # @yield type-coercion block
       #
-      def property(name, type = nil, options = {}, &coerce_block)
+      def attribute(name, type = nil, options = {}, &coerce_block)
 
         # Handle optional "type" argument
         if options.empty? && type.kind_of?(Hash)

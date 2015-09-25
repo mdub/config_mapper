@@ -12,10 +12,10 @@ describe ConfigMapper::ConfigStruct do
 
   let(:target) { target_class.new }
 
-  describe ".property" do
+  describe ".attribute" do
 
     with_target_class do
-      property :name
+      attribute :name
     end
 
     it "defines accessor methods" do
@@ -26,7 +26,7 @@ describe ConfigMapper::ConfigStruct do
     context "with a block" do
 
       with_target_class do
-        property(:size) { |arg| Integer(arg) }
+        attribute(:size) { |arg| Integer(arg) }
       end
 
       it "uses the block to check the value" do
@@ -43,7 +43,7 @@ describe ConfigMapper::ConfigStruct do
     context "with a Symbol argument" do
 
       with_target_class do
-        property :size, :Integer
+        attribute :size, :Integer
       end
 
       it "invokes the corresponding type-coercion method" do
@@ -60,7 +60,7 @@ describe ConfigMapper::ConfigStruct do
     context "with a default" do
 
       with_target_class do
-        property :port, :default => 5000
+        attribute :port, :default => 5000
       end
 
       it "defaults to the specified value" do
@@ -80,8 +80,8 @@ describe ConfigMapper::ConfigStruct do
 
     with_target_class do
       component :position do
-        property :x
-        property :y
+        attribute :x
+        attribute :y
       end
     end
 
