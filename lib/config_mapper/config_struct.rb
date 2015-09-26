@@ -27,7 +27,8 @@ module ConfigMapper
         end
         coerce_block = method(type) if type
         if options.key?(:default)
-          defaults[name] = options.fetch(:default).freeze
+          default_value = options.fetch(:default).freeze
+          attribute_initializers[name] = proc { default_value }
         else
           required_attributes << name
         end
@@ -45,8 +46,9 @@ module ConfigMapper
       #
       def component(name, component_class = ConfigStruct, &block)
         name = name.to_sym
+        components << name
         component_class = Class.new(component_class, &block) if block
-        components[name] = component_class
+        attribute_initializers[name] = component_class.method(:new)
         attr_reader name
       end
 
@@ -54,22 +56,19 @@ module ConfigMapper
         @required_attributes ||= []
       end
 
-      def defaults
-        @defaults ||= {}
+      def attribute_initializers
+        @attribute_initializers ||= {}
       end
 
       def components
-        @components ||= {}
+        @components ||= []
       end
 
     end
 
     def initialize
-      self.class.defaults.each do |name, value|
-        instance_variable_set("@#{name}", value)
-      end
-      self.class.components.each do |name, component_class|
-        instance_variable_set("@#{name}", component_class.new)
+      self.class.attribute_initializers.each do |name, initializer|
+        instance_variable_set("@#{name}", initializer.call)
       end
     end
 
@@ -90,7 +89,7 @@ module ConfigMapper
 
     def components
       {}.tap do |result|
-        self.class.components.each do |name, _|
+        self.class.components.each do |name|
           result[name] = instance_variable_get("@#{name}")
         end
       end
