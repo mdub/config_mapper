@@ -20,41 +20,32 @@ module ConfigMapper
       # @yield type-coercion block
       #
       def attribute(name, type = nil, options = {}, &coerce_block)
-
         name = name.to_sym
-
-        # Handle optional "type" argument
-        if options.empty? && type.kind_of?(Hash)
+        if options.empty? && type.is_a?(Hash)
           options = type
           type = nil
         end
-        if type
-          coerce_block = method(type)
-        end
-
+        coerce_block = method(type) if type
         if options.key?(:default)
           defaults[name] = options.fetch(:default).freeze
         else
           required_attributes << name
         end
-
-        attr_accessor(name)
-
+        attr_reader(name)
         if coerce_block
           define_method("#{name}=") do |arg|
             instance_variable_set("@#{name}", coerce_block.call(arg))
           end
+        else
+          attr_writer(name)
         end
-
       end
 
       # Defines a sub-component.
       #
       def component(name, component_class = ConfigStruct, &block)
         name = name.to_sym
-        if block
-          component_class = Class.new(component_class, &block)
-        end
+        component_class = Class.new(component_class, &block) if block
         components[name] = component_class
         attr_reader name
       end
@@ -83,9 +74,9 @@ module ConfigMapper
     end
 
     def undefined_attributes
-      result = self.class.required_attributes.reject { |name|
+      result = self.class.required_attributes.map(&:to_s).reject do |name|
         instance_variable_defined?("@#{name}")
-      }.map(&:to_s)
+      end
       components.each do |component_name, value|
         next unless value.respond_to?(:undefined_attributes)
         result += value.undefined_attributes.map do |name|
