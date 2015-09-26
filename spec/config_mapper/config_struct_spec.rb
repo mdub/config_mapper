@@ -96,7 +96,7 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
-  describe "#unset_attributes" do
+  describe "#undefined_attributes" do
 
     with_target_class do
       attribute :foo
@@ -108,20 +108,20 @@ describe ConfigMapper::ConfigStruct do
     end
 
     it "includes attributes that haven't been set" do
-      expect(target.unset_attributes).to include("foo")
+      expect(target.undefined_attributes).to include("foo")
     end
 
     it "includes component attributes that haven't been set" do
-      expect(target.unset_attributes).to include("position.x")
+      expect(target.undefined_attributes).to include("position.x")
     end
 
     it "excludes attributes that have been set" do
       target.bar = "something"
-      expect(target.unset_attributes).not_to include("bar")
+      expect(target.undefined_attributes).not_to include("bar")
     end
 
     it "excludes attributes that have defaults" do
-      expect(target.unset_attributes).not_to include("baz")
+      expect(target.undefined_attributes).not_to include("baz")
     end
 
   end

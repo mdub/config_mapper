@@ -79,12 +79,12 @@ module ConfigMapper
       end
     end
 
-    def unset_attributes
+    def undefined_attributes
       result = self.class.required_attributes.reject { |name|
         instance_variable_defined?("@#{name}")
       }.map(&:to_s)
       components.each do |component_name, value|
-        result += value.unset_attributes.map do |name|
+        result += value.undefined_attributes.map do |name|
           "#{component_name}.#{name}"
         end
       end
