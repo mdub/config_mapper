@@ -87,6 +87,7 @@ module ConfigMapper
         instance_variable_defined?("@#{name}")
       }.map(&:to_s)
       components.each do |component_name, value|
+        next unless value.respond_to?(:undefined_attributes)
         result += value.undefined_attributes.map do |name|
           "#{component_name}.#{name}"
         end

@@ -123,6 +123,7 @@ describe ConfigMapper::ConfigStruct do
       component :position do
         attribute :x
       end
+      component :shirt, Struct.new(:x, :y)
     end
 
     it "includes attributes that haven't been set" do
