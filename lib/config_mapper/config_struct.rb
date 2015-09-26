@@ -50,9 +50,12 @@ module ConfigMapper
 
       # Defines a sub-component.
       #
-      def component(name, &block)
+      def component(name, component_class = ConfigStruct, &block)
         name = name.to_sym
-        components[name] = Class.new(self, &block)
+        if block
+          component_class = Class.new(component_class, &block)
+        end
+        components[name] = component_class
         attr_reader name
       end
 

@@ -78,20 +78,38 @@ describe ConfigMapper::ConfigStruct do
 
   describe ".component" do
 
-    with_target_class do
-      component :position do
-        attribute :x
-        attribute :y
+    context "with a block" do
+
+      with_target_class do
+        component :position do
+          attribute :x
+          attribute :y
+        end
       end
+
+      it "creates a sub-structure" do
+        expect(target.position).to be_kind_of(ConfigMapper::ConfigStruct)
+      end
+
+      it "maintains component state" do
+        target.position.x = 42
+        expect(target.position.x).to eql(42)
+      end
+
     end
 
-    it "creates a sub-structure" do
-      expect(target.position).to be_kind_of(ConfigMapper::ConfigStruct)
-    end
+    context "with a component Class" do
 
-    it "maintains component state" do
-      target.position.x = 42
-      expect(target.position.x).to eql(42)
+      shirt_class = Struct.new(:colour, :size)
+
+      with_target_class do
+        component :shirt, shirt_class
+      end
+
+      it "initializes the component with an instance of that class" do
+        expect(target.shirt).to be_kind_of(shirt_class)
+      end
+
     end
 
   end
