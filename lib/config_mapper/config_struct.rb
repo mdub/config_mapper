@@ -52,6 +52,19 @@ module ConfigMapper
         attr_reader name
       end
 
+      # Defines an associative array of sub-components.
+      #
+      def component_map(name, component_class = ConfigStruct, &block)
+        name = name.to_sym
+        component_class = Class.new(component_class, &block) if block
+        attribute_initializers[name] = lambda do
+          Hash.new do |h, key|
+            h[key] = component_class.new
+          end
+        end
+        attr_reader name
+      end
+
       def required_attributes
         @required_attributes ||= []
       end

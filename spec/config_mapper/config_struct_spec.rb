@@ -114,6 +114,29 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
+  describe ".component_map" do
+
+    with_target_class do
+      component_map :containers do
+        attribute :image
+      end
+    end
+
+    it "defines a map" do
+      expect(target.containers).to respond_to(:[])
+    end
+
+    it "starts empty" do
+      expect(target.containers).to be_empty
+    end
+
+    it "create entries on access" do
+      target.containers["app"].image = "foo"
+      expect(target.containers["app"].image).to eql("foo")
+    end
+
+  end
+
   describe "#undefined_attributes" do
 
     with_target_class do
