@@ -147,6 +147,9 @@ describe ConfigMapper::ConfigStruct do
         attribute :x
       end
       component :shirt, Struct.new(:x, :y)
+      component_map :services do
+        attribute :port
+      end
     end
 
     it "includes attributes that haven't been set" do
@@ -155,6 +158,11 @@ describe ConfigMapper::ConfigStruct do
 
     it "includes component attributes that haven't been set" do
       expect(target.undefined_attributes).to include("position.x")
+    end
+
+    it "includes component-map entry attributes that haven't been set" do
+      target.services["app"]
+      expect(target.undefined_attributes).to include(%(services["app"].port))
     end
 
     it "excludes attributes that have been set" do

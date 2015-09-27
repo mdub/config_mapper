@@ -46,7 +46,7 @@ module ConfigMapper
       #
       def component(name, component_class = ConfigStruct, &block)
         name = name.to_sym
-        components << name
+        declared_components << name
         component_class = Class.new(component_class, &block) if block
         attribute_initializers[name] = component_class.method(:new)
         attr_reader name
@@ -56,6 +56,7 @@ module ConfigMapper
       #
       def component_map(name, component_class = ConfigStruct, &block)
         name = name.to_sym
+        declared_component_maps << name
         component_class = Class.new(component_class, &block) if block
         attribute_initializers[name] = lambda do
           Hash.new do |h, key|
@@ -73,8 +74,12 @@ module ConfigMapper
         @attribute_initializers ||= {}
       end
 
-      def components
-        @components ||= []
+      def declared_components
+        @declared_components ||= []
+      end
+
+      def declared_component_maps
+        @declared_component_maps ||= []
       end
 
     end
@@ -102,8 +107,13 @@ module ConfigMapper
 
     def components
       {}.tap do |result|
-        self.class.components.each do |name|
+        self.class.declared_components.each do |name|
           result[name] = instance_variable_get("@#{name}")
+        end
+        self.class.declared_component_maps.each do |name|
+          instance_variable_get("@#{name}").each do |key, value|
+            result["#{name}[#{key.inspect}]"] = value
+          end
         end
       end
     end
