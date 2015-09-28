@@ -120,7 +120,7 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
-  describe "#undefined_attributes" do
+  describe "#config_errors" do
 
     with_target_class do
       attribute :foo
@@ -136,25 +136,25 @@ describe ConfigMapper::ConfigStruct do
     end
 
     it "includes attributes that haven't been set" do
-      expect(target.undefined_attributes).to include("foo")
+      expect(target.config_errors).to have_key("foo")
     end
 
     it "includes component attributes that haven't been set" do
-      expect(target.undefined_attributes).to include("position.x")
+      expect(target.config_errors).to have_key("position.x")
     end
 
     it "includes component-map entry attributes that haven't been set" do
       target.services["app"]
-      expect(target.undefined_attributes).to include(%(services["app"].port))
+      expect(target.config_errors).to have_key(%(services["app"].port))
     end
 
     it "excludes attributes that have been set" do
       target.bar = "something"
-      expect(target.undefined_attributes).not_to include("bar")
+      expect(target.config_errors).not_to have_key("bar")
     end
 
     it "excludes attributes that have defaults" do
-      expect(target.undefined_attributes).not_to include("baz")
+      expect(target.config_errors).not_to have_key("baz")
     end
 
   end

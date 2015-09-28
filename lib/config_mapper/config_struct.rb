@@ -86,18 +86,8 @@ module ConfigMapper
       end
     end
 
-    def undefined_attributes
-      result = self.class.required_attributes.map(&:to_s).reject do |name|
-        instance_variable_defined?("@#{name}")
-      end
-      components.each do |component_name, value|
-        if value.respond_to?(:undefined_attributes)
-          result += value.undefined_attributes.map do |name|
-            "#{component_name}.#{name}"
-          end
-        end
-      end
-      result
+    def config_errors
+      missing_required_attribute_errors.merge(component_config_errors)
     end
 
     private
@@ -110,6 +100,29 @@ module ConfigMapper
         self.class.declared_component_dicts.each do |name|
           instance_variable_get("@#{name}").each do |key, value|
             result["#{name}[#{key.inspect}]"] = value
+          end
+        end
+      end
+    end
+
+    NOT_SET = "no value provided".freeze
+
+    def missing_required_attribute_errors
+      {}.tap do |errors|
+        self.class.required_attributes.each do |name|
+          unless instance_variable_defined?("@#{name}")
+            errors[name.to_s] = NOT_SET
+          end
+        end
+      end
+    end
+
+    def component_config_errors
+      {}.tap do |errors|
+        components.each do |component_name, component_value|
+          next unless component_value.respond_to?(:config_errors)
+          component_value.config_errors.each do |key, value|
+            errors["#{component_name}.#{key}"] = value
           end
         end
       end
