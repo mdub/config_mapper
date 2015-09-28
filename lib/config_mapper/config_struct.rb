@@ -1,3 +1,5 @@
+require "forwardable"
+
 module ConfigMapper
 
   # A configuration container
@@ -53,9 +55,7 @@ module ConfigMapper
         declared_component_maps << name
         component_class = Class.new(component_class, &block) if block
         attribute_initializers[name] = lambda do
-          Hash.new do |h, key|
-            h[key] = component_class.new
-          end
+          ConfigDict.new(component_class)
         end
         attr_reader name
       end
@@ -111,6 +111,25 @@ module ConfigMapper
         end
       end
     end
+
+  end
+
+  class ConfigDict
+
+    def initialize(entry_class)
+      @entry_class = entry_class
+      @entries = {}
+    end
+
+    def [](key)
+      @entries[key] ||= @entry_class.new
+    end
+
+    extend Forwardable
+
+    def_delegators :@entries, :each, :empty?
+
+    include Enumerable
 
   end
 
