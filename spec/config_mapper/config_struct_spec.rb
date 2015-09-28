@@ -40,23 +40,6 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
-    context "with a Symbol argument" do
-
-      with_target_class do
-        attribute :size, :Integer
-      end
-
-      it "invokes the corresponding type-coercion method" do
-        expect { target.size = "abc" }.to raise_error(ArgumentError)
-      end
-
-      it "assigns the return value to the attribute" do
-        target.size = "456"
-        expect(target.size).to eql(456)
-      end
-
-    end
-
     context "with a default" do
 
       with_target_class do
