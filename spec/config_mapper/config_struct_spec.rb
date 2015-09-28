@@ -97,10 +97,10 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
-  describe ".component_map" do
+  describe ".component_dict" do
 
     with_target_class do
-      component_map :containers do
+      component_dict :containers do
         attribute :image
       end
     end
@@ -130,7 +130,7 @@ describe ConfigMapper::ConfigStruct do
         attribute :x
       end
       component :shirt, Struct.new(:x, :y)
-      component_map :services do
+      component_dict :services do
         attribute :port
       end
     end

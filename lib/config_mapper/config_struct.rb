@@ -51,9 +51,9 @@ module ConfigMapper
 
       # Defines an associative array of sub-components.
       #
-      def component_map(name, factory = ConfigStruct, &block)
+      def component_dict(name, factory = ConfigStruct, &block)
         name = name.to_sym
-        declared_component_maps << name
+        declared_component_dicts << name
         factory = Class.new(factory, &block) if block
         factory = factory.method(:new) if factory.respond_to?(:new)
         attribute_initializers[name] = lambda do
@@ -74,8 +74,8 @@ module ConfigMapper
         @declared_components ||= []
       end
 
-      def declared_component_maps
-        @declared_component_maps ||= []
+      def declared_component_dicts
+        @declared_component_dicts ||= []
       end
 
     end
@@ -107,7 +107,7 @@ module ConfigMapper
         self.class.declared_components.each do |name|
           result[name] = instance_variable_get("@#{name}")
         end
-        self.class.declared_component_maps.each do |name|
+        self.class.declared_component_dicts.each do |name|
           instance_variable_get("@#{name}").each do |key, value|
             result["#{name}[#{key.inspect}]"] = value
           end
