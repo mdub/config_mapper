@@ -40,22 +40,24 @@ module ConfigMapper
 
       # Defines a sub-component.
       #
-      def component(name, component_class = ConfigStruct, &block)
+      def component(name, factory = ConfigStruct, &block)
         name = name.to_sym
         declared_components << name
-        component_class = Class.new(component_class, &block) if block
-        attribute_initializers[name] = component_class.method(:new)
+        factory = Class.new(factory, &block) if block
+        factory = factory.method(:new) if factory.respond_to?(:new)
+        attribute_initializers[name] = factory
         attr_reader name
       end
 
       # Defines an associative array of sub-components.
       #
-      def component_map(name, component_class = ConfigStruct, &block)
+      def component_map(name, factory = ConfigStruct, &block)
         name = name.to_sym
         declared_component_maps << name
-        component_class = Class.new(component_class, &block) if block
+        factory = Class.new(factory, &block) if block
+        factory = factory.method(:new) if factory.respond_to?(:new)
         attribute_initializers[name] = lambda do
-          ConfigDict.new(component_class)
+          ConfigDict.new(&factory)
         end
         attr_reader name
       end
@@ -89,9 +91,10 @@ module ConfigMapper
         instance_variable_defined?("@#{name}")
       end
       components.each do |component_name, value|
-        next unless value.respond_to?(:undefined_attributes)
-        result += value.undefined_attributes.map do |name|
-          "#{component_name}.#{name}"
+        if value.respond_to?(:undefined_attributes)
+          result += value.undefined_attributes.map do |name|
+            "#{component_name}.#{name}"
+          end
         end
       end
       result
@@ -116,13 +119,13 @@ module ConfigMapper
 
   class ConfigDict
 
-    def initialize(entry_class)
-      @entry_class = entry_class
+    def initialize(&entry_factory)
+      @entry_factory = entry_factory
       @entries = {}
     end
 
     def [](key)
-      @entries[key] ||= @entry_class.new
+      @entries[key] ||= @entry_factory.call
     end
 
     extend Forwardable
