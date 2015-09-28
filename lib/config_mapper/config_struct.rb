@@ -15,17 +15,11 @@ module ConfigMapper
       # validate the argument.
       #
       # @param name [Symbol] attribute name
-      # @param type [Symbol] name of type-coercion method
       # @options options [String] :default (nil) default value
       # @yield type-coercion block
       #
-      def attribute(name, type = nil, options = {}, &coerce_block)
+      def attribute(name, options = {}, &coerce_block)
         name = name.to_sym
-        if options.empty? && type.is_a?(Hash)
-          options = type
-          type = nil
-        end
-        coerce_block = method(type) if type
         if options.key?(:default)
           default_value = options.fetch(:default).freeze
           attribute_initializers[name] = proc { default_value }
