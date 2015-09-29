@@ -118,6 +118,20 @@ describe ConfigMapper::ConfigStruct do
       expect(target.containers["app"].image).to eql("foo")
     end
 
+    it "implements #keys" do
+      target.containers["app"].image = "foo"
+      expect(target.containers.keys).to eql(["app"])
+    end
+
+    it "can be enumerated" do
+      target.containers["app"].image = "foo"
+      container_images = {}
+      target.containers.each do |name, container|
+        container_images[name] = container.image
+      end
+      expect(container_images).to eql({"app" => "foo"})
+    end
+
   end
 
   describe "#config_errors" do
