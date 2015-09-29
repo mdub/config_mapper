@@ -40,24 +40,26 @@ module ConfigMapper
 
       # Defines a sub-component.
       #
-      def component(name, factory = ConfigStruct, &block)
+      def component(name, options = {}, &block)
         name = name.to_sym
         declared_components << name
-        factory = Class.new(factory, &block) if block
-        factory = factory.method(:new) if factory.respond_to?(:new)
-        attribute_initializers[name] = factory
+        type = options.fetch(:type, ConfigStruct)
+        type = Class.new(type, &block) if block
+        type = type.method(:new) if type.respond_to?(:new)
+        attribute_initializers[name] = type
         attr_reader name
       end
 
       # Defines an associative array of sub-components.
       #
-      def component_dict(name, factory = ConfigStruct, &block)
+      def component_dict(name, options = {}, &block)
         name = name.to_sym
         declared_component_dicts << name
-        factory = Class.new(factory, &block) if block
-        factory = factory.method(:new) if factory.respond_to?(:new)
+        type = options.fetch(:type, ConfigStruct)
+        type = Class.new(type, &block) if block
+        type = type.method(:new) if type.respond_to?(:new)
         attribute_initializers[name] = lambda do
-          ConfigDict.new(&factory)
+          ConfigDict.new(type)
         end
         attr_reader name
       end
@@ -132,13 +134,13 @@ module ConfigMapper
 
   class ConfigDict
 
-    def initialize(&entry_factory)
-      @entry_factory = entry_factory
+    def initialize(entry_type)
+      @entry_type = entry_type
       @entries = {}
     end
 
     def [](key)
-      @entries[key] ||= @entry_factory.call
+      @entries[key] ||= @entry_type.call
     end
 
     extend Forwardable

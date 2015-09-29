@@ -86,7 +86,7 @@ describe ConfigMapper::ConfigStruct do
       shirt_class = Struct.new(:colour, :size)
 
       with_target_class do
-        component :shirt, shirt_class
+        component :shirt, :type => shirt_class
       end
 
       it "initializes the component with an instance of that class" do
@@ -143,7 +143,7 @@ describe ConfigMapper::ConfigStruct do
       component :position do
         attribute :x
       end
-      component :shirt, Struct.new(:x, :y)
+      component :shirt, :type => Struct.new(:x, :y)
       component_dict :services do
         attribute :port
       end
