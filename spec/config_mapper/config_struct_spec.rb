@@ -12,18 +12,18 @@ describe ConfigMapper::ConfigStruct do
 
   let(:target) { target_class.new }
 
-  describe ".attribute" do
+  context "with an .attribute" do
 
     with_target_class do
       attribute :name
     end
 
-    it "defines accessor methods" do
+    it "has accessor methods" do
       target.name = "bob"
       expect(target.name).to eql("bob")
     end
 
-    context "with a block" do
+    context "declared with a block" do
 
       with_target_class do
         attribute(:size) { |arg| Integer(arg) }
@@ -40,7 +40,7 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
-    context "with a default" do
+    context "that has a :default" do
 
       with_target_class do
         attribute :port, :default => 5000
@@ -59,9 +59,9 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
-  describe ".component" do
+  context "with a .component" do
 
-    context "with a block" do
+    context "declared with a block" do
 
       with_target_class do
         component :position do
@@ -70,7 +70,7 @@ describe ConfigMapper::ConfigStruct do
         end
       end
 
-      it "creates a sub-structure" do
+      it "has a component with the specified name" do
         expect(target.position).to be_kind_of(ConfigMapper::ConfigStruct)
       end
 
@@ -81,7 +81,7 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
-    context "with a component Class" do
+    context "declared with a :type" do
 
       shirt_class = Struct.new(:colour, :size)
 
@@ -89,7 +89,7 @@ describe ConfigMapper::ConfigStruct do
         component :shirt, :type => shirt_class
       end
 
-      it "initializes the component with an instance of that class" do
+      it "has a component of the specified type" do
         expect(target.shirt).to be_kind_of(shirt_class)
       end
 
@@ -97,7 +97,7 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
-  describe ".component_dict" do
+  context "with a .component_dict" do
 
     with_target_class do
       component_dict :containers do
@@ -105,31 +105,35 @@ describe ConfigMapper::ConfigStruct do
       end
     end
 
-    it "defines a map" do
-      expect(target.containers).to respond_to(:[])
-    end
+    describe "the named attribute" do
 
-    it "starts empty" do
-      expect(target.containers).to be_empty
-    end
-
-    it "create entries on access" do
-      target.containers["app"].image = "foo"
-      expect(target.containers["app"].image).to eql("foo")
-    end
-
-    it "implements #keys" do
-      target.containers["app"].image = "foo"
-      expect(target.containers.keys).to eql(["app"])
-    end
-
-    it "can be enumerated" do
-      target.containers["app"].image = "foo"
-      container_images = {}
-      target.containers.each do |name, container|
-        container_images[name] = container.image
+      it "looks like a dictionary" do
+        expect(target.containers).to respond_to(:[])
       end
-      expect(container_images).to eql({"app" => "foo"})
+
+      it "starts empty" do
+        expect(target.containers).to be_empty
+      end
+
+      it "create entries on access" do
+        target.containers["app"].image = "foo"
+        expect(target.containers["app"].image).to eql("foo")
+      end
+
+      it "implements #keys" do
+        target.containers["app"].image = "foo"
+        expect(target.containers.keys).to eql(["app"])
+      end
+
+      it "can be enumerated" do
+        target.containers["app"].image = "foo"
+        container_images = {}
+        target.containers.each do |name, container|
+          container_images[name] = container.image
+        end
+        expect(container_images).to eql({"app" => "foo"})
+      end
+
     end
 
   end
@@ -157,7 +161,7 @@ describe ConfigMapper::ConfigStruct do
       expect(target.config_errors).to have_key("position.x")
     end
 
-    it "includes component-map entry attributes that haven't been set" do
+    it "includes component_dict entry attributes that haven't been set" do
       target.services["app"]
       expect(target.config_errors).to have_key(%(services["app"].port))
     end
