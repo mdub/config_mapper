@@ -58,8 +58,10 @@ module ConfigMapper
         type = options.fetch(:type, ConfigStruct)
         type = Class.new(type, &block) if block
         type = type.method(:new) if type.respond_to?(:new)
+        key_type = options[:key_type]
+        key_type = key_type.method(:new) if key_type.respond_to?(:new)
         attribute_initializers[name] = lambda do
-          ConfigDict.new(type)
+          ConfigDict.new(type, key_type)
         end
         attr_reader name
       end
@@ -134,12 +136,14 @@ module ConfigMapper
 
   class ConfigDict
 
-    def initialize(entry_type)
+    def initialize(entry_type, key_type = nil)
       @entry_type = entry_type
+      @key_type = key_type
       @entries = {}
     end
 
     def [](key)
+      key = @key_type.call(key) if @key_type
       @entries[key] ||= @entry_type.call
     end
 

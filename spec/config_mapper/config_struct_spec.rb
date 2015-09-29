@@ -29,7 +29,7 @@ describe ConfigMapper::ConfigStruct do
         attribute(:size) { |arg| Integer(arg) }
       end
 
-      it "uses the block to check the value" do
+      it "invokes the block to validate the value" do
         expect { target.size = "abc" }.to raise_error(ArgumentError)
       end
 
@@ -99,13 +99,13 @@ describe ConfigMapper::ConfigStruct do
 
   context "with a .component_dict" do
 
-    with_target_class do
-      component_dict :containers do
-        attribute :image
-      end
-    end
-
     describe "the named attribute" do
+
+      with_target_class do
+        component_dict :containers do
+          attribute :image
+        end
+      end
 
       it "looks like a dictionary" do
         expect(target.containers).to respond_to(:[])
@@ -132,6 +132,22 @@ describe ConfigMapper::ConfigStruct do
           container_images[name] = container.image
         end
         expect(container_images).to eql({"app" => "foo"})
+      end
+
+    end
+
+    context "declared with a :key_type" do
+
+      with_target_class do
+        component_dict :allow_access_on, :key_type => method(:Integer) do
+          attribute :from
+        end
+      end
+
+      it "invokes the key_type Proc to validate keys" do
+        expect { target.allow_access_on["abc"] }.to raise_error
+        expect { target.allow_access_on["22"] }.not_to raise_error
+        expect(target.allow_access_on.keys).to eql([22])
       end
 
     end
