@@ -1,4 +1,3 @@
-require "config_mapper/error_proxy"
 require "config_mapper/object_as_hash"
 
 module ConfigMapper
@@ -6,6 +5,12 @@ module ConfigMapper
   # Sets attributes on an object, collecting errors
   #
   class AttributeSink
+
+    def self.set(data, target)
+      mapper = new(target)
+      mapper.set_attributes(data)
+      mapper.errors
+    end
 
     def initialize(target, errors = {})
       @target = ObjectAsHash[target]
@@ -27,9 +32,10 @@ module ConfigMapper
     #
     def set_attribute(key, value)
       if value.is_a?(Hash) && !target[key].nil?
-        nested_errors = ErrorProxy.new(errors, ".#{key}")
-        nested_mapper = self.class.new(target[key], nested_errors)
-        nested_mapper.set_attributes(value)
+        nested_errors = AttributeSink.set(value, target[key])
+        nested_errors.each do |nested_key, error|
+          errors[".#{key}#{nested_key}"] = error
+        end
       else
         target[key] = value
       end
