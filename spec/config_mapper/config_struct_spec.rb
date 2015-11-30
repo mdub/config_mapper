@@ -170,25 +170,25 @@ describe ConfigMapper::ConfigStruct do
     end
 
     it "includes attributes that haven't been set" do
-      expect(target.config_errors).to have_key("foo")
+      expect(target.config_errors).to have_key(".foo")
     end
 
     it "includes component attributes that haven't been set" do
-      expect(target.config_errors).to have_key("position.x")
+      expect(target.config_errors).to have_key(".position.x")
     end
 
     it "includes component_dict entry attributes that haven't been set" do
       target.services["app"]
-      expect(target.config_errors).to have_key(%(services["app"].port))
+      expect(target.config_errors).to have_key(%(.services["app"].port))
     end
 
     it "excludes attributes that have been set" do
       target.bar = "something"
-      expect(target.config_errors).not_to have_key("bar")
+      expect(target.config_errors).not_to have_key(".bar")
     end
 
     it "excludes attributes that have defaults" do
-      expect(target.config_errors).not_to have_key("baz")
+      expect(target.config_errors).not_to have_key(".baz")
     end
 
   end

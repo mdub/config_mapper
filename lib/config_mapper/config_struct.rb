@@ -99,11 +99,11 @@ module ConfigMapper
     def components
       {}.tap do |result|
         self.class.declared_components.each do |name|
-          result[name] = instance_variable_get("@#{name}")
+          result[".#{name}"] = instance_variable_get("@#{name}")
         end
         self.class.declared_component_dicts.each do |name|
           instance_variable_get("@#{name}").each do |key, value|
-            result["#{name}[#{key.inspect}]"] = value
+            result[".#{name}[#{key.inspect}]"] = value
           end
         end
       end
@@ -115,7 +115,7 @@ module ConfigMapper
       {}.tap do |errors|
         self.class.required_attributes.each do |name|
           unless instance_variable_defined?("@#{name}")
-            errors[name.to_s] = NOT_SET
+            errors[".#{name}"] = NOT_SET
           end
         end
       end
@@ -126,7 +126,7 @@ module ConfigMapper
         components.each do |component_name, component_value|
           next unless component_value.respond_to?(:config_errors)
           component_value.config_errors.each do |key, value|
-            errors["#{component_name}.#{key}"] = value
+            errors["#{component_name}#{key}"] = value
           end
         end
       end
