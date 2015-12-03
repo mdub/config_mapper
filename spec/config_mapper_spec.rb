@@ -136,7 +136,9 @@ describe ConfigMapper do
         end
 
         it "records errors raised by nested objects" do
-          expect(errors[".mary.attitude"]).to be_a(NoMethodError)
+          bad_attitude = '["mary"].attitude'
+          expect(errors.keys).to include(bad_attitude)
+          expect(errors[bad_attitude]).to be_a(NoMethodError)
         end
 
       end

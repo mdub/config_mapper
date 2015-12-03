@@ -47,16 +47,21 @@ module ConfigMapper
     # Set a single attribute.
     #
     def set_attribute(key, value)
+      target_name = if target.is_a?(ObjectAsHash)
+        ".#{key}"
+      else
+        "[#{key.inspect}]"
+      end
       if value.is_a?(Hash) && !target[key].nil?
         nested_errors = ConfigMapper.set(value, target[key])
         nested_errors.each do |nested_key, error|
-          errors[".#{key}#{nested_key}"] = error
+          errors["#{target_name}#{nested_key}"] = error
         end
       else
         target[key] = value
       end
     rescue NoMethodError, ArgumentError => e
-      errors[".#{key}"] = e
+      errors[target_name] = e
     end
 
   end
