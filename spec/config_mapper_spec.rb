@@ -113,20 +113,19 @@ describe ConfigMapper do
 
     end
 
-
     context "when the target is a Hash" do
 
       let(:source_data) do
         {
           "stan" => { "x" => 1, "y" => 2 },
-          "mary" => { "x" => 5, "y" => 6, "attitude" => "unknown" },
+          "mary" => { "x" => 5, "y" => 6, "attitude" => "unknown" }
         }
       end
 
       context "and contains an entry for the key" do
 
         let(:positions) do
-          Hash.new do |h,k|
+          Hash.new do |h, k|
             h[k] = Testy::Position.new
           end
         end
@@ -150,7 +149,7 @@ describe ConfigMapper do
         let(:target) { positions }
 
         it "injects the Hash of data" do
-          expect(positions["stan"]).to eq({ "x" => 1, "y" => 2 })
+          expect(positions["stan"]).to eq("x" => 1, "y" => 2)
         end
 
       end

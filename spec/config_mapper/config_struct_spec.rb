@@ -131,7 +131,7 @@ describe ConfigMapper::ConfigStruct do
         target.containers.each do |name, container|
           container_images[name] = container.image
         end
-        expect(container_images).to eql({"app" => "foo"})
+        expect(container_images).to eql("app" => "foo")
       end
 
     end
