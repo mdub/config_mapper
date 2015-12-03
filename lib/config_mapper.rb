@@ -1,22 +1,37 @@
-require "config_mapper/object_as_hash"
+require "config_mapper/hash_target"
+require "config_mapper/object_target"
 
 # Supports marshalling of plain-old data (e.g. loaded from
 # YAML files) onto strongly-typed objects.
 #
 module ConfigMapper
 
-  # Attempt to set attributes on a target object.
-  #
-  # For simple, scalar values, set the attribute by calling the
-  # named writer-method on the target object.
-  #
-  # For Hash values, set attributes of the named sub-component.
-  #
-  # @return [Hash] exceptions encountered
-  #
-  def self.set(data, target)
-    target = ObjectAsHash[target]
-    AttributeMapping.new(data, target).apply
+  class << self
+
+    # Attempt to set attributes on a target object.
+    #
+    # For simple, scalar values, set the attribute by calling the
+    # named writer-method on the target object.
+    #
+    # For Hash values, set attributes of the named sub-component.
+    #
+    # @return [Hash] exceptions encountered
+    #
+    def set(data, target_object)
+      target = wrap_target(target_object)
+      AttributeMapping.new(data, target).apply
+    end
+
+    private
+
+    def wrap_target(target_object)
+      if target_object.is_a?(Hash)
+        HashTarget.new(target_object)
+      else
+        ObjectTarget.new(target_object)
+      end
+    end
+
   end
 
   # Sets attributes on an object, collecting errors
@@ -47,21 +62,17 @@ module ConfigMapper
     # Set a single attribute.
     #
     def set_attribute(key, value)
-      target_name = if target.is_a?(ObjectAsHash)
-        ".#{key}"
-      else
-        "[#{key.inspect}]"
-      end
-      if value.is_a?(Hash) && !target[key].nil?
-        nested_errors = ConfigMapper.set(value, target[key])
-        nested_errors.each do |nested_key, error|
-          errors["#{target_name}#{nested_key}"] = error
+      attribute_path = target.path(key)
+      if value.is_a?(Hash) && !target.get(key).nil?
+        nested_errors = ConfigMapper.set(value, target.get(key))
+        nested_errors.each do |nested_path, error|
+          errors["#{attribute_path}#{nested_path}"] = error
         end
       else
-        target[key] = value
+        target.set(key, value)
       end
     rescue NoMethodError, ArgumentError => e
-      errors[target_name] = e
+      errors[attribute_path] = e
     end
 
   end
