@@ -1,4 +1,5 @@
 require "config_mapper/attribute_sink"
+require "config_mapper/object_as_hash"
 
 # Supports marshalling of plain-old data (e.g. loaded from
 # YAML files) onto strongly-typed objects.
@@ -15,6 +16,7 @@ module ConfigMapper
   # @return [Hash] exceptions encountered
   #
   def self.set(data, target)
+    target = ObjectAsHash[target]
     mapper = AttributeSink.new(target)
     mapper.set_attributes(data)
     mapper.errors

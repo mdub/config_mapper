@@ -1,5 +1,3 @@
-require "config_mapper/object_as_hash"
-
 module ConfigMapper
 
   # Sets attributes on an object, collecting errors
@@ -7,7 +5,7 @@ module ConfigMapper
   class AttributeSink
 
     def initialize(target, errors = {})
-      @target = ObjectAsHash[target]
+      @target = target
       @errors = errors
     end
 
