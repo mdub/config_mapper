@@ -6,12 +6,6 @@ module ConfigMapper
   #
   class AttributeSink
 
-    def self.set(data, target)
-      mapper = new(target)
-      mapper.set_attributes(data)
-      mapper.errors
-    end
-
     def initialize(target, errors = {})
       @target = ObjectAsHash[target]
       @errors = errors
@@ -32,7 +26,7 @@ module ConfigMapper
     #
     def set_attribute(key, value)
       if value.is_a?(Hash) && !target[key].nil?
-        nested_errors = AttributeSink.set(value, target[key])
+        nested_errors = ConfigMapper.set(value, target[key])
         nested_errors.each do |nested_key, error|
           errors[".#{key}#{nested_key}"] = error
         end
