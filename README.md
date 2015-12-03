@@ -109,6 +109,70 @@ errors = ConfigMapper.set(config_data, state)
 errors    #=> { ["position", "bogus"] => #<NoMethodError> }
 ```
 
+## ConfigStruct
+
+ConfigMapper works pretty well with plain old Ruby objects, but we
+provide a base-class, `ConfigMapper::ConfigStruct`, with a DSL that
+makes it even easier to declare configuration data-structures.
+
+```ruby
+require "config_mapper/config_struct"
+
+class State < ConfigMapper::ConfigStruct
+
+  component :position do
+    attribute(:x) { |arg| Integer(arg) }
+    attribute(:y) { |arg| Integer(arg) }
+  end
+
+  attribute :orientation
+
+end
+```
+
+By default, declared attributes are assumed to be mandatory. The
+`ConfigStruct#config_errors` method returns errors for each unset mandatory
+attribute.
+
+```ruby
+state = State.new
+state.position.x = 3
+state.position.y = 4
+state.config_errors
+#=> { ".orientation" => "no value provided" }
+```
+
+`#config_errors` can be overridden to provide custom semantic validation.
+
+Attributes can be given default values. Provide an explicit `nil` default to
+mark an attribute as optional, e.g.
+
+```ruby
+class Address < ConfigMapper::ConfigStruct
+
+  attribute :host
+  attribute :port, :default => 80
+  attribute :path, :default => nil
+
+end
+```
+
+`ConfigStruct#set` maps data into the object, and combines mapping errors and
+semantic errors (returned by `#config_errors`) into a single Hash:
+
+```ruby
+data = {
+  "position" => { "x" => 3, "y" => "fore" },
+  "bogus" => "foobar"
+}
+state.set(data)
+#=> {
+#=>   ".orientation" => "no value provided",
+#=>   ".position.y" => #<ArgumentError: invalid value for Integer(): "fore">,
+#=>   ".bogus" => #<NoMethodError: undefined method `bogus=' for #<State:0x007fc8e9b12a60>>
+#=> }
+```
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
