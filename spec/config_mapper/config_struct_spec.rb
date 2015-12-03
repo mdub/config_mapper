@@ -193,4 +193,32 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
+  describe "#set" do
+
+    with_target_class do
+      attribute(:shape)
+      attribute(:size) { |arg| Integer(arg) }
+      attribute(:name)
+    end
+
+    let!(:errors) do
+      target.set(:shape => "square", :size => "wobble")
+    end
+
+    it "sets attributes" do
+      expect(target.shape).to eql("square")
+    end
+
+    it "returns marshalling errors" do
+      expect(errors.keys).to include(".size")
+      expect(errors[".size"]).to be_an(ArgumentError)
+    end
+
+    it "returns config_errors" do
+      expect(errors.keys).to include(".name")
+      expect(errors[".name"]).to eql("no value provided")
+    end
+
+  end
+
 end

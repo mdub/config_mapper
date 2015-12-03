@@ -1,3 +1,4 @@
+require "config_mapper"
 require "forwardable"
 
 module ConfigMapper
@@ -92,6 +93,11 @@ module ConfigMapper
 
     def config_errors
       missing_required_attribute_errors.merge(component_config_errors)
+    end
+
+    def set(data)
+      set_errors = ConfigMapper.set(data, self)
+      self.config_errors.merge(set_errors)
     end
 
     private
