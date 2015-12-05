@@ -94,9 +94,7 @@ ConfigMapper cannot and will not _create_ objects for you.
 
 ### Errors
 
-`ConfigMapper.set` returns a Hash of errors encountered while mapping data
-onto objects.  The errors are Exceptions (typically ArgumentError or NoMethodError),
-keyed by a Array representing the path to the offending data.  e.g.
+`ConfigMapper.set` returns a Hash of errors encountered while mapping data onto objects.  The errors are Exceptions (typically ArgumentError or NoMethodError), keyed by the path to the offending data.  e.g.
 
 ```ruby
 config_data = {
@@ -106,7 +104,7 @@ config_data = {
 }
 
 errors = ConfigMapper.set(config_data, state)
-errors    #=> { ["position", "bogus"] => #<NoMethodError> }
+errors    #=> { ".position.bogus" => #<NoMethodError> }
 ```
 
 ## ConfigStruct
