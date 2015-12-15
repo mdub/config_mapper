@@ -3,7 +3,7 @@ require "forwardable"
 
 module ConfigMapper
 
-  # A configuration container
+  # A set of configurable attributes.
   #
   class ConfigStruct
 
@@ -41,6 +41,13 @@ module ConfigMapper
 
       # Defines a sub-component.
       #
+      # If a block is be provided, it will be `class_eval`ed to define the
+      # sub-components class.
+      #
+      # @param name [Symbol] component name
+      # @options options [String] :type (ConfigMapper::ConfigStruct)
+      #   component base-class
+      #
       def component(name, options = {}, &block)
         name = name.to_sym
         declared_components << name
@@ -52,6 +59,15 @@ module ConfigMapper
       end
 
       # Defines an associative array of sub-components.
+      #
+      # If a block is be provided, it will be `class_eval`ed to define the
+      # sub-components class.
+      #
+      # @param name [Symbol] dictionary attribute name
+      # @options options [Proc] :key_type
+      #   function used to validate keys
+      # @options options [String] :type (ConfigMapper::ConfigStruct)
+      #   base-class for sub-component values
       #
       def component_dict(name, options = {}, &block)
         name = name.to_sym
@@ -95,9 +111,14 @@ module ConfigMapper
       missing_required_attribute_errors.merge(component_config_errors)
     end
 
-    def set(data)
-      set_errors = ConfigMapper.set(data, self)
-      self.config_errors.merge(set_errors)
+    # Set values of attributes.
+    #
+    # @param attribute_values [Hash] attribute values
+    # @return [Hash] errors encountered, keyed by attribute path
+    #
+    def set(attribute_values)
+      set_errors = ConfigMapper.set(attribute_values, self)
+      config_errors.merge(set_errors)
     end
 
     private
