@@ -107,8 +107,12 @@ module ConfigMapper
       end
     end
 
+    def immediate_config_errors
+      missing_required_attribute_errors
+    end
+
     def config_errors
-      missing_required_attribute_errors.merge(component_config_errors)
+      immediate_config_errors.merge(component_config_errors)
     end
 
     # Set values of attributes.
