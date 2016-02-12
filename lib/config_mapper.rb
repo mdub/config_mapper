@@ -8,27 +8,30 @@ module ConfigMapper
 
   class << self
 
-    # Attempt to set attributes on a target object.
+    def configure(target)
+      if target.is_a?(Hash)
+        HashTarget.new(target)
+      else
+        ObjectTarget.new(target)
+      end
+    end
+
+    # Configure a target object.
     #
     # For simple, scalar values, set the attribute by calling the
     # named writer-method on the target object.
     #
     # For Hash values, set attributes of the named sub-component.
     #
+    # @deprecated Prefer ConfigMapper.configure(object).with(data)
+    #
+    # @param data configuration data
+    # @param [Object, Hash] target_object object to configure
+    #
     # @return [Hash] exceptions encountered
     #
     def set(data, target_object)
-      wrap_target(target_object).configure_with(data)
-    end
-
-    private
-
-    def wrap_target(target_object)
-      if target_object.is_a?(Hash)
-        HashTarget.new(target_object)
-      else
-        ObjectTarget.new(target_object)
-      end
+      configure(target_object).with(data)
     end
 
   end

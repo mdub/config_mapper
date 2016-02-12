@@ -8,10 +8,10 @@ module ConfigMapper
     #
     # @return [Hash] exceptions encountered
     #
-    def configure_with(data)
+    def with(data)
       errors = {}
       data.each do |key, value|
-        set_attribute(key, value, errors)
+        configure_attribute(key, value, errors)
       end
       errors
     end
@@ -20,7 +20,7 @@ module ConfigMapper
 
     # Set a single attribute.
     #
-    def set_attribute(key, value, errors)
+    def configure_attribute(key, value, errors)
       attribute_path = path(key)
       if value.is_a?(Hash) && !get(key).nil?
         nested_errors = ConfigMapper.set(value, get(key))

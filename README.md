@@ -48,7 +48,7 @@ ConfigMapper will help you out:
 ```ruby
 require 'config_mapper'
 
-errors = ConfigMapper.set(config_data, state)
+errors = ConfigMapper.configure(state).with(config_data)
 state.orientation              #=> "North"
 state.position.x               #=> 2
 ```
@@ -63,7 +63,7 @@ config_data = {
   "mary" => { "x" => 3, "y" => 5 }
 }
 
-ConfigMapper.set(config_data, positions)
+ConfigMapper.configure(positions).with(config_data)
 positions["fred"].x            #=> 2
 positions["mary"].y            #=> 5
 ```
@@ -73,7 +73,7 @@ positions["mary"].y            #=> 5
 Given
 
 ```ruby
-ConfigMapper.set(config_data, config_target)
+ConfigMapper.configure(config_target).with(config_data)
 ```
 
 the `config_target` object is expected provide accessor-methods corresponding
@@ -103,7 +103,7 @@ config_data = {
   }
 }
 
-errors = ConfigMapper.set(config_data, state)
+errors = ConfigMapper.configure(state).with(config_data)
 errors    #=> { ".position.bogus" => #<NoMethodError> }
 ```
 
@@ -155,7 +155,7 @@ class Address < ConfigMapper::ConfigStruct
 end
 ```
 
-`ConfigStruct#set` maps data into the object, and combines mapping errors and
+`ConfigStruct#configure_with` maps data into the object, and combines mapping errors and
 semantic errors (returned by `#config_errors`) into a single Hash:
 
 ```ruby
@@ -163,7 +163,7 @@ data = {
   "position" => { "x" => 3, "y" => "fore" },
   "bogus" => "foobar"
 }
-state.set(data)
+state.configure_with(data)
 #=> {
 #=>   ".orientation" => "no value provided",
 #=>   ".position.y" => #<ArgumentError: invalid value for Integer(): "fore">,
