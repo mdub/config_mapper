@@ -115,12 +115,12 @@ module ConfigMapper
       immediate_config_errors.merge(component_config_errors)
     end
 
-    # Set values of attributes.
+    # Configure with data.
     #
     # @param attribute_values [Hash] attribute values
     # @return [Hash] errors encountered, keyed by attribute path
     #
-    def set(attribute_values)
+    def configure_with(attribute_values)
       set_errors = ConfigMapper.set(attribute_values, self)
       config_errors.merge(set_errors)
     end

@@ -202,7 +202,7 @@ describe ConfigMapper::ConfigStruct do
     end
 
     let!(:errors) do
-      target.set(:shape => "square", :size => "wobble")
+      target.configure_with(:shape => "square", :size => "wobble")
     end
 
     it "sets attributes" do
