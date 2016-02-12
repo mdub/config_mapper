@@ -1,8 +1,10 @@
+require "config_mapper/abstract_target"
+
 module ConfigMapper
 
   # Wrap an object to make it look more like a Hash.
   #
-  class HashTarget
+  class HashTarget < AbstractTarget
 
     def initialize(hash)
       @hash = hash
