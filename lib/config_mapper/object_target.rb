@@ -1,10 +1,10 @@
-require "config_mapper/abstract_target"
+require "config_mapper/target"
 
 module ConfigMapper
 
   # Configuration proxy for an Object.
   #
-  class ObjectTarget < AbstractTarget
+  class ObjectTarget < Target
 
     def initialize(object)
       @object = object
