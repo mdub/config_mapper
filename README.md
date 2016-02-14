@@ -48,7 +48,7 @@ ConfigMapper will help you out:
 ```ruby
 require 'config_mapper'
 
-errors = ConfigMapper.configure(state).with(config_data)
+errors = ConfigMapper.configure_with(config_data, state)
 state.orientation              #=> "North"
 state.position.x               #=> 2
 ```
@@ -63,7 +63,7 @@ config_data = {
   "mary" => { "x" => 3, "y" => 5 }
 }
 
-ConfigMapper.configure(positions).with(config_data)
+ConfigMapper.configure_with(config_data, positions)
 positions["fred"].x            #=> 2
 positions["mary"].y            #=> 5
 ```
@@ -73,10 +73,10 @@ positions["mary"].y            #=> 5
 Given
 
 ```ruby
-ConfigMapper.configure(config_target).with(config_data)
+ConfigMapper.configure_with(config_data, target)
 ```
 
-the `config_target` object is expected provide accessor-methods corresponding
+the `target` object is expected provide accessor-methods corresponding
 to the attributes that you want to make configurable.  For example, with:
 
 ```ruby
@@ -94,7 +94,7 @@ ConfigMapper cannot and will not _create_ objects for you.
 
 ### Errors
 
-`ConfigMapper.set` returns a Hash of errors encountered while mapping data onto objects.  The errors are Exceptions (typically ArgumentError or NoMethodError), keyed by the path to the offending data.  e.g.
+`ConfigMapper.configure_with` returns a Hash of errors encountered while mapping data onto objects.  The errors are Exceptions (typically ArgumentError or NoMethodError), keyed by the path to the offending data.  e.g.
 
 ```ruby
 config_data = {
@@ -103,7 +103,7 @@ config_data = {
   }
 }
 
-errors = ConfigMapper.configure(state).with(config_data)
+errors = ConfigMapper.configure_with(config_data, state)
 errors    #=> { ".position.bogus" => #<NoMethodError> }
 ```
 

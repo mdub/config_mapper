@@ -8,30 +8,30 @@ module ConfigMapper
 
   class << self
 
-    def configure(target)
-      if target.is_a?(Hash)
-        HashTarget.new(target)
-      else
-        ObjectTarget.new(target)
-      end
-    end
-
-    # Configure a target object.
+    # Set attributes of a target object based on configuration data.
     #
     # For simple, scalar values, set the attribute by calling the
     # named writer-method on the target object.
     #
     # For Hash values, set attributes of the named sub-component.
     #
-    # @deprecated Prefer ConfigMapper.configure(object).with(data)
-    #
     # @param data configuration data
-    # @param [Object, Hash] target_object object to configure
+    # @param [Object, Hash] target the object to configure
     #
     # @return [Hash] exceptions encountered
     #
-    def set(data, target_object)
-      configure(target_object).with(data)
+    def configure_with(data, target)
+      target(target).with(data)
+    end
+
+    alias_method :set, :configure_with
+
+    def target(target)
+      if target.is_a?(Hash)
+        HashTarget.new(target)
+      else
+        ObjectTarget.new(target)
+      end
     end
 
   end

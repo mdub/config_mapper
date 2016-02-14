@@ -23,7 +23,7 @@ module ConfigMapper
     def configure_attribute(key, value, errors)
       attribute_path = path(key)
       if value.is_a?(Hash) && !get(key).nil?
-        nested_errors = ConfigMapper.set(value, get(key))
+        nested_errors = ConfigMapper.configure_with(value, get(key))
         nested_errors.each do |nested_path, error|
           errors["#{attribute_path}#{nested_path}"] = error
         end

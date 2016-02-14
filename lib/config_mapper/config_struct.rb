@@ -121,8 +121,8 @@ module ConfigMapper
     # @return [Hash] errors encountered, keyed by attribute path
     #
     def configure_with(attribute_values)
-      set_errors = ConfigMapper.set(attribute_values, self)
-      config_errors.merge(set_errors)
+      errors = ConfigMapper.configure_with(attribute_values, self)
+      config_errors.merge(errors)
     end
 
     private
