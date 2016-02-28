@@ -1,10 +1,10 @@
-require "config_mapper/target"
+require "config_mapper/mapper"
 
 module ConfigMapper
 
   # Configuration proxy for a Hash.
   #
-  class HashTarget < Target
+  class DictMapper < Mapper
 
     def initialize(hash)
       @hash = hash

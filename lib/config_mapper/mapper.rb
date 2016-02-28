@@ -2,7 +2,7 @@ module ConfigMapper
 
   # Something that accepts configuration.
   #
-  class Target
+  class Mapper
 
     # Map configuration data onto the target.
     #

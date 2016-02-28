@@ -1,5 +1,5 @@
-require "config_mapper/hash_target"
-require "config_mapper/object_target"
+require "config_mapper/dict_mapper"
+require "config_mapper/object_mapper"
 
 # Supports marshalling of plain-old data (e.g. loaded from
 # YAML files) onto strongly-typed objects.
@@ -21,16 +21,16 @@ module ConfigMapper
     # @return [Hash] exceptions encountered
     #
     def configure_with(data, target)
-      target(target).with(data)
+      mapper_for(target).with(data)
     end
 
     alias_method :set, :configure_with
 
-    def target(target)
+    def mapper_for(target)
       if target.is_a?(Hash)
-        HashTarget.new(target)
+        DictMapper.new(target)
       else
-        ObjectTarget.new(target)
+        ObjectMapper.new(target)
       end
     end
 
