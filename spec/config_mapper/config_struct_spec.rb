@@ -134,6 +134,19 @@ describe ConfigMapper::ConfigStruct do
         expect(container_images).to eql("app" => "foo")
       end
 
+      it "can be configured" do
+        config_data = {
+          "containers" => {
+            "app" => {
+              "image" => "foobar"
+            }
+          }
+        }
+        errors = target.configure_with(config_data)
+        expect(errors).to be_empty
+        expect(target.containers["app"].image).to eql("foobar")
+      end
+
     end
 
     context "declared with a :key_type" do

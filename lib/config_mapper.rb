@@ -1,3 +1,4 @@
+require "config_mapper/config_dict"
 require "config_mapper/dict_mapper"
 require "config_mapper/object_mapper"
 
@@ -27,7 +28,7 @@ module ConfigMapper
     alias_method :set, :configure_with
 
     def mapper_for(target)
-      if target.is_a?(Hash)
+      if target.is_a?(Hash) || target.is_a?(ConfigMapper::ConfigDict)
         DictMapper.new(target)
       else
         ObjectMapper.new(target)

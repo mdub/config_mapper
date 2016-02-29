@@ -1,5 +1,5 @@
 require "config_mapper"
-require "forwardable"
+require "config_mapper/config_dict"
 
 module ConfigMapper
 
@@ -162,27 +162,6 @@ module ConfigMapper
         end
       end
     end
-
-  end
-
-  class ConfigDict
-
-    def initialize(entry_type, key_type = nil)
-      @entry_type = entry_type
-      @key_type = key_type
-      @entries = {}
-    end
-
-    def [](key)
-      key = @key_type.call(key) if @key_type
-      @entries[key] ||= @entry_type.call
-    end
-
-    extend Forwardable
-
-    def_delegators :@entries, :each, :empty?, :keys, :map, :size
-
-    include Enumerable
 
   end
 
