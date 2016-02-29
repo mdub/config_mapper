@@ -8,7 +8,7 @@ module ConfigMapper
     #
     # @return [Hash] exceptions encountered
     #
-    def with(data)
+    def configure_with(data)
       errors = {}
       data.each do |key, value|
         configure_attribute(key, value, errors)

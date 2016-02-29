@@ -21,7 +21,7 @@ module ConfigMapper
     # @return [Hash] exceptions encountered
     #
     def configure_with(data, target)
-      mapper_for(target).with(data)
+      mapper_for(target).configure_with(data)
     end
 
     alias_method :set, :configure_with
