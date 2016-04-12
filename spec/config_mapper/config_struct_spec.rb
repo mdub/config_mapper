@@ -57,6 +57,69 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
+    context "declared with a block and a default value" do
+
+      with_target_class do
+        attribute :port, :default => 5000, &method(:Integer)
+      end
+
+      context "and no override provided" do
+
+        it "defaults to the specified value" do
+          expect(target.port).to eql(5000)
+        end
+
+        it "invokes the block to validate the default value" do
+          expect { target.port = "abc" }.to raise_error(ArgumentError)
+        end
+
+      end
+
+      context "with overridden value" do
+
+        it "assigns the return value to the attribute" do
+          target.port = 456
+          expect(target.port).to eql(456)
+        end
+
+        it "invokes the block to validate the override value" do
+          expect { target.port = "abc" }.to raise_error(ArgumentError)
+        end
+
+      end
+
+      context "with an optional value" do
+
+        with_target_class do
+          attribute :port, :default => nil, &method(:Integer)
+        end
+
+        it "assigns the return value to the attribute" do
+          target.port = 456
+          expect(target.port).to eql(456)
+        end
+
+        it "invokes the block to validate the override value" do
+          expect { target.port = "abc" }.to raise_error(ArgumentError)
+        end
+
+        context "and an explicit nil value" do
+
+          with_target_class do
+            attribute :port, :default => nil, &method(:Integer)
+          end
+
+          it "assigns the return value to the attribute" do
+            target.port = nil
+            expect(target.port).to eql(nil)
+          end
+
+        end
+
+      end
+
+    end
+
   end
 
   context "with a .component" do
