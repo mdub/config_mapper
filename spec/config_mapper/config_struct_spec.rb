@@ -206,7 +206,7 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
-  describe "#set" do
+  describe "#configure_with" do
 
     with_target_class do
       attribute(:shape)
