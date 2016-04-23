@@ -140,13 +140,19 @@ module ConfigMapper
       end
     end
 
-    NOT_SET = "no value provided".freeze
+    class AttributeNotSet < StandardError
+
+      def initialize
+        super("no value provided")
+      end
+
+    end
 
     def missing_required_attribute_errors
       {}.tap do |errors|
         self.class.required_attributes.each do |name|
           if instance_variable_get("@#{name}").nil?
-            errors[".#{name}"] = NOT_SET
+            errors[".#{name}"] = AttributeNotSet.new
           end
         end
       end

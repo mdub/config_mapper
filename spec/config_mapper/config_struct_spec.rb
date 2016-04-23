@@ -207,7 +207,7 @@ describe ConfigMapper::ConfigStruct do
 
     it "returns config_errors" do
       expect(errors.keys).to include(".name")
-      expect(errors[".name"]).to eql("no value provided")
+      expect(errors[".name"].to_s).to eql("no value provided")
     end
 
   end
