@@ -145,7 +145,7 @@ module ConfigMapper
     def missing_required_attribute_errors
       {}.tap do |errors|
         self.class.required_attributes.each do |name|
-          unless instance_variable_defined?("@#{name}")
+          if instance_variable_get("@#{name}").nil?
             errors[".#{name}"] = NOT_SET
           end
         end

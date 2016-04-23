@@ -186,6 +186,11 @@ describe ConfigMapper::ConfigStruct do
       expect(target.config_errors).to have_key(".foo")
     end
 
+    it "includes attributes that have been set to nil" do
+      target.foo = nil
+      expect(target.config_errors).to have_key(".foo")
+    end
+
     it "includes component attributes that haven't been set" do
       expect(target.config_errors).to have_key(".position.x")
     end
