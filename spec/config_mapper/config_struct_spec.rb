@@ -23,76 +23,72 @@ describe ConfigMapper::ConfigStruct do
       expect(target.name).to eql("bob")
     end
 
-    context "declared with a block" do
+  end
 
-      with_target_class do
-        attribute(:size) { |arg| Integer(arg) }
-      end
+  context "with an .attribute declared with a block" do
 
-      it "invokes the block to validate the value" do
-        expect { target.size = "abc" }.to raise_error(ArgumentError)
-      end
-
-      it "assigns the return value to the attribute" do
-        target.size = "456"
-        expect(target.size).to eql(456)
-      end
-
+    with_target_class do
+      attribute(:size) { |arg| Integer(arg) }
     end
 
-    context "that has a :default" do
+    it "uses the block to validate the value" do
+      expect { target.size = "abc" }.to raise_error(ArgumentError)
+    end
 
-      with_target_class do
-        attribute :port, :default => 5000
-      end
+    it "assigns the block's return value to the attribute" do
+      target.size = "456"
+      expect(target.size).to eql(456)
+    end
 
-      it "defaults to the specified value" do
-        expect(target.port).to eql(5000)
-      end
+  end
 
-      it "allows override of default" do
-        target.port = 456
-        expect(target.port).to eql(456)
-      end
+  context "with an .attribute with a :default" do
 
+    with_target_class do
+      attribute :port, :default => 5000
+    end
+
+    it "defaults to the specified value" do
+      expect(target.port).to eql(5000)
+    end
+
+    it "allows override of default" do
+      target.port = 456
+      expect(target.port).to eql(456)
     end
 
   end
 
   context "with a .component" do
 
-    context "declared with a block" do
-
-      with_target_class do
-        component :position do
-          attribute :x
-          attribute :y
-        end
+    with_target_class do
+      component :position do
+        attribute :x
+        attribute :y
       end
-
-      it "has a component with the specified name" do
-        expect(target.position).to be_kind_of(ConfigMapper::ConfigStruct)
-      end
-
-      it "maintains component state" do
-        target.position.x = 42
-        expect(target.position.x).to eql(42)
-      end
-
     end
 
-    context "declared with a :type" do
+    it "has a component with the specified name" do
+      expect(target.position).to be_kind_of(ConfigMapper::ConfigStruct)
+    end
 
-      shirt_class = Struct.new(:colour, :size)
+    it "maintains component state" do
+      target.position.x = 42
+      expect(target.position.x).to eql(42)
+    end
 
-      with_target_class do
-        component :shirt, :type => shirt_class
-      end
+  end
 
-      it "has a component of the specified type" do
-        expect(target.shirt).to be_kind_of(shirt_class)
-      end
+  context "with a .component declared with a :type" do
 
+    shirt_class = Struct.new(:colour, :size)
+
+    with_target_class do
+      component :shirt, :type => shirt_class
+    end
+
+    it "has a component of the specified type" do
+      expect(target.shirt).to be_kind_of(shirt_class)
     end
 
   end
@@ -149,20 +145,20 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
-    context "declared with a :key_type" do
+  end
 
-      with_target_class do
-        component_dict :allow_access_on, :key_type => method(:Integer) do
-          attribute :from
-        end
+  context "with a .component_dict declared with a :key_type" do
+
+    with_target_class do
+      component_dict :allow_access_on, :key_type => method(:Integer) do
+        attribute :from
       end
+    end
 
-      it "invokes the key_type Proc to validate keys" do
-        expect { target.allow_access_on["abc"] }.to raise_error
-        expect { target.allow_access_on["22"] }.not_to raise_error
-        expect(target.allow_access_on.keys).to eql([22])
-      end
-
+    it "invokes the key_type Proc to validate keys" do
+      expect { target.allow_access_on["abc"] }.to raise_error
+      expect { target.allow_access_on["22"] }.not_to raise_error
+      expect(target.allow_access_on.keys).to eql([22])
     end
 
   end
