@@ -103,31 +103,8 @@ describe ConfigMapper::ConfigStruct do
         end
       end
 
-      it "looks like a dictionary" do
-        expect(target.containers).to respond_to(:[])
-      end
-
-      it "starts empty" do
-        expect(target.containers).to be_empty
-      end
-
-      it "create entries on access" do
-        target.containers["app"].image = "foo"
-        expect(target.containers["app"].image).to eql("foo")
-      end
-
-      it "implements #keys" do
-        target.containers["app"].image = "foo"
-        expect(target.containers.keys).to eql(["app"])
-      end
-
-      it "can be enumerated" do
-        target.containers["app"].image = "foo"
-        container_images = {}
-        target.containers.each do |name, container|
-          container_images[name] = container.image
-        end
-        expect(container_images).to eql("app" => "foo")
+      it "is a ConfigDict" do
+        expect(target.containers).to be_a(ConfigMapper::ConfigDict)
       end
 
       it "can be configured" do
