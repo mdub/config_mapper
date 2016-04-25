@@ -21,7 +21,7 @@ module ConfigMapper
       # @options options [String] :default (nil) default value
       # @yield type-coercion block
       #
-      def attribute(name, options = {}, &coerce_block)
+      def attribute(name, options = {})
         name = name.to_sym
         required = true
         if options.key?(:default)
@@ -31,12 +31,9 @@ module ConfigMapper
         end
         required_attributes << name if required
         attr_reader(name)
-        if coerce_block
-          define_method("#{name}=") do |arg|
-            instance_variable_set("@#{name}", coerce_block.call(arg))
-          end
-        else
-          attr_writer(name)
+        define_method("#{name}=") do |value|
+          value = yield(value) if block_given?
+          instance_variable_set("@#{name}", value)
         end
       end
 
