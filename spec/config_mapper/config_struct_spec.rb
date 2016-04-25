@@ -12,54 +12,54 @@ describe ConfigMapper::ConfigStruct do
 
   let(:target) { target_class.new }
 
-  context "with an .attribute" do
+  describe ".attribute" do
 
     with_target_class do
       attribute :name
     end
 
-    it "has accessor methods" do
+    it "declares accessor methods" do
       target.name = "bob"
       expect(target.name).to eql("bob")
     end
 
+    context "with a block" do
+
+      with_target_class do
+        attribute(:size) { |arg| Integer(arg) }
+      end
+
+      it "uses the block to validate the value" do
+        expect { target.size = "abc" }.to raise_error(ArgumentError)
+      end
+
+      it "assigns the block's return value to the attribute" do
+        target.size = "456"
+        expect(target.size).to eql(456)
+      end
+
+    end
+
+    context "with a :default" do
+
+      with_target_class do
+        attribute :port, :default => 5000
+      end
+
+      it "defaults to the specified value" do
+        expect(target.port).to eql(5000)
+      end
+
+      it "allows override of default" do
+        target.port = 456
+        expect(target.port).to eql(456)
+      end
+
+    end
+
   end
 
-  context "with an .attribute declared with a block" do
-
-    with_target_class do
-      attribute(:size) { |arg| Integer(arg) }
-    end
-
-    it "uses the block to validate the value" do
-      expect { target.size = "abc" }.to raise_error(ArgumentError)
-    end
-
-    it "assigns the block's return value to the attribute" do
-      target.size = "456"
-      expect(target.size).to eql(456)
-    end
-
-  end
-
-  context "with an .attribute with a :default" do
-
-    with_target_class do
-      attribute :port, :default => 5000
-    end
-
-    it "defaults to the specified value" do
-      expect(target.port).to eql(5000)
-    end
-
-    it "allows override of default" do
-      target.port = 456
-      expect(target.port).to eql(456)
-    end
-
-  end
-
-  context "with a .component" do
+  describe ".component" do
 
     with_target_class do
       component :position do
@@ -68,7 +68,7 @@ describe ConfigMapper::ConfigStruct do
       end
     end
 
-    it "has a component with the specified name" do
+    it "declares a sub-component" do
       expect(target.position).to be_kind_of(ConfigMapper::ConfigStruct)
     end
 
@@ -77,65 +77,65 @@ describe ConfigMapper::ConfigStruct do
       expect(target.position.x).to eql(42)
     end
 
-  end
+    context "with a :type" do
 
-  context "with a .component declared with a :type" do
-
-    shirt_class = Struct.new(:colour, :size)
-
-    with_target_class do
-      component :shirt, :type => shirt_class
-    end
-
-    it "has a component of the specified type" do
-      expect(target.shirt).to be_kind_of(shirt_class)
-    end
-
-  end
-
-  context "with a .component_dict" do
-
-    describe "the named attribute" do
+      shirt_class = Struct.new(:colour, :size)
 
       with_target_class do
-        component_dict :containers do
-          attribute :image
+        component :shirt, :type => shirt_class
+      end
+
+      it "has a component of the specified type" do
+        expect(target.shirt).to be_kind_of(shirt_class)
+      end
+
+    end
+
+  end
+
+  describe ".component_dict" do
+
+    with_target_class do
+      component_dict :containers do
+        attribute :image
+      end
+    end
+
+    it "declares a Hash-like component" do
+      expect(target.containers).to be_a(ConfigMapper::ConfigDict)
+    end
+
+    it "defines an entry-type" do
+      expect(target.containers["whatever"]).to respond_to(:image)
+    end
+
+    it "can be configured" do
+      config_data = {
+        "containers" => {
+          "app" => {
+            "image" => "foobar"
+          }
+        }
+      }
+      errors = target.configure_with(config_data)
+      expect(errors).to be_empty
+      expect(target.containers["app"].image).to eql("foobar")
+    end
+
+    context "with a :key_type" do
+
+      with_target_class do
+        component_dict :allow_access_on, :key_type => method(:Integer) do
+          attribute :from
         end
       end
 
-      it "is a ConfigDict" do
-        expect(target.containers).to be_a(ConfigMapper::ConfigDict)
+      it "invokes the key_type Proc to validate keys" do
+        expect { target.allow_access_on["abc"] }.to raise_error
+        expect { target.allow_access_on["22"] }.not_to raise_error
+        expect(target.allow_access_on.keys).to eql([22])
       end
 
-      it "can be configured" do
-        config_data = {
-          "containers" => {
-            "app" => {
-              "image" => "foobar"
-            }
-          }
-        }
-        errors = target.configure_with(config_data)
-        expect(errors).to be_empty
-        expect(target.containers["app"].image).to eql("foobar")
-      end
-
-    end
-
-  end
-
-  context "with a .component_dict declared with a :key_type" do
-
-    with_target_class do
-      component_dict :allow_access_on, :key_type => method(:Integer) do
-        attribute :from
-      end
-    end
-
-    it "invokes the key_type Proc to validate keys" do
-      expect { target.allow_access_on["abc"] }.to raise_error
-      expect { target.allow_access_on["22"] }.not_to raise_error
-      expect(target.allow_access_on.keys).to eql([22])
     end
 
   end
