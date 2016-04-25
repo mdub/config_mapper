@@ -57,6 +57,14 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
+    context "when set to nil" do
+
+      it "raises an ArgumentError" do
+        expect { target.name = nil }.to raise_error(ArgumentError)
+      end
+
+    end
+
     context "optional" do
 
       with_target_class do
@@ -160,8 +168,7 @@ describe ConfigMapper::ConfigStruct do
   describe "#config_errors" do
 
     with_target_class do
-      attribute :foo
-      attribute :bar
+      attribute :name
       attribute :port, :default => 80
       attribute :perhaps, :default => nil
       component :position do
@@ -174,19 +181,12 @@ describe ConfigMapper::ConfigStruct do
     end
 
     it "includes unset attributes" do
-      expect(target.config_errors).to have_key(".foo")
-    end
-
-    it "includes attributes set to nil" do
-      target.foo = nil
-      target.port = nil
-      expect(target.config_errors).to have_key(".foo")
-      expect(target.config_errors).to have_key(".port")
+      expect(target.config_errors).to have_key(".name")
     end
 
     it "excludes attributes set non-nil" do
-      target.bar = "something"
-      expect(target.config_errors).not_to have_key(".bar")
+      target.name = "something"
+      expect(target.config_errors).not_to have_key(".name")
     end
 
     it "excludes optional attributes" do

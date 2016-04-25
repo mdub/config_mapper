@@ -32,7 +32,9 @@ module ConfigMapper
         required_attributes << name if required
         attr_reader(name)
         define_method("#{name}=") do |value|
-          unless value.nil? && !required
+          if value.nil?
+            raise NoValueProvided if required
+          else
             value = yield(value) if block_given?
           end
           instance_variable_set("@#{name}", value)
@@ -140,7 +142,7 @@ module ConfigMapper
       end
     end
 
-    class NoValueProvided < StandardError
+    class NoValueProvided < ArgumentError
 
       def initialize
         super("no value provided")
