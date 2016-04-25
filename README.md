@@ -122,8 +122,8 @@ require "config_mapper/config_struct"
 class State < ConfigMapper::ConfigStruct
 
   component :position do
-    attribute(:x) { |arg| Integer(arg) }
-    attribute(:y) { |arg| Integer(arg) }
+    attribute :x
+    attribute :y
   end
 
   attribute :orientation
@@ -131,35 +131,48 @@ class State < ConfigMapper::ConfigStruct
 end
 ```
 
-By default, declared attributes are assumed to be mandatory. The
-`ConfigStruct#config_errors` method returns errors for each unset mandatory
-attribute.
+`ConfigStruct#config_errors` returns errors for each unset mandatory attribute.
 
 ```ruby
 state = State.new
 state.position.x = 3
 state.position.y = 4
 state.config_errors
-#=> { ".orientation" => "no value provided" }
+#=> { ".orientation" => #<ConfigMapper::ConfigStruct::AttributeNotSet: no value provided> }
 ```
 
 `#config_errors` can be overridden to provide custom semantic validation.
 
-Attributes can be given default values. Provide an explicit `nil` default to
-mark an attribute as optional, e.g.
+Attributes can be given default values. Specify a default value of `nil` to mark an attribute as optional, e.g.
 
 ```ruby
 class Address < ConfigMapper::ConfigStruct
-
   attribute :host
   attribute :port, :default => 80
   attribute :path, :default => nil
+end
+```
+
+If a block is provided when an `attribute` is declared, it is used to validate values when they are set, and/or coerce them to a canonical type.  The block should raise `ArgumentError` to indicate an invalid value.
+
+```ruby
+class Server < ConfigMapper::ConfigStruct
+
+  attribute :host do |arg|
+    unless arg =~ /^\w+(\.\w+)+$/
+      raise ArgumentError, "invalid hostname: #{arg}"
+    end
+    arg
+  end
+
+  attribute :port do |arg|
+    Integer(arg)
+  end
 
 end
 ```
 
-`ConfigStruct#configure_with` maps data into the object, and combines mapping errors and
-semantic errors (returned by `#config_errors`) into a single Hash:
+`ConfigStruct#configure_with` maps data into the object, and combines mapping errors and semantic errors (returned by `#config_errors`) into a single Hash:
 
 ```ruby
 data = {
