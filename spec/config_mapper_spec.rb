@@ -38,9 +38,9 @@ end
 
 describe ConfigMapper do
 
-  describe ".set" do
+  describe ".configure_with" do
 
-    let!(:errors) { described_class.set(source_data, target) }
+    let!(:errors) { described_class.configure_with(source_data, target) }
 
     context "with a simple Hash" do
 
