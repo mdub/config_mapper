@@ -32,7 +32,9 @@ module ConfigMapper
         required_attributes << name if required
         attr_reader(name)
         define_method("#{name}=") do |value|
-          value = yield(value) if block_given?
+          unless value.nil? && !required
+            value = yield(value) if block_given?
+          end
           instance_variable_set("@#{name}", value)
         end
       end

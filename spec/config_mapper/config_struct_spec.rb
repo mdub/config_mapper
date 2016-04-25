@@ -57,6 +57,23 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
+    context "with :default nil" do
+
+      with_target_class do
+        attribute :port, :default => nil, &method(:Integer)
+      end
+
+      context "when set to nil" do
+
+        it "bypasses the validation block" do
+          target.port = nil
+          expect(target.port).to be_nil
+        end
+
+      end
+
+    end
+
   end
 
   describe ".component" do
