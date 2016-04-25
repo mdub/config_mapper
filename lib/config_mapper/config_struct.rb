@@ -140,7 +140,7 @@ module ConfigMapper
       end
     end
 
-    class AttributeNotSet < StandardError
+    class NoValueProvided < StandardError
 
       def initialize
         super("no value provided")
@@ -152,7 +152,7 @@ module ConfigMapper
       {}.tap do |errors|
         self.class.required_attributes.each do |name|
           if instance_variable_get("@#{name}").nil?
-            errors[".#{name}"] = AttributeNotSet.new
+            errors[".#{name}"] = NoValueProvided.new
           end
         end
       end

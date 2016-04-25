@@ -138,7 +138,7 @@ state = State.new
 state.position.x = 3
 state.position.y = 4
 state.config_errors
-#=> { ".orientation" => #<ConfigMapper::ConfigStruct::AttributeNotSet: no value provided> }
+#=> { ".orientation" => #<ConfigMapper::ConfigStruct::NoValueProvided: no value provided> }
 ```
 
 `#config_errors` can be overridden to provide custom semantic validation.
