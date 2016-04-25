@@ -23,12 +23,13 @@ module ConfigMapper
       #
       def attribute(name, options = {}, &coerce_block)
         name = name.to_sym
+        required = true
         if options.key?(:default)
           default_value = options.fetch(:default).freeze
+          required = false if default_value.nil?
           attribute_initializers[name] = proc { default_value }
-        else
-          required_attributes << name
         end
+        required_attributes << name if required
         attr_reader(name)
         if coerce_block
           define_method("#{name}=") do |arg|

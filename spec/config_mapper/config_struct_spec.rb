@@ -145,7 +145,8 @@ describe ConfigMapper::ConfigStruct do
     with_target_class do
       attribute :foo
       attribute :bar
-      attribute :baz, :default => nil
+      attribute :port, :default => 80
+      attribute :perhaps, :default => nil
       component :position do
         attribute :x
       end
@@ -155,22 +156,24 @@ describe ConfigMapper::ConfigStruct do
       end
     end
 
-    it "includes attributes that haven't been set" do
+    it "includes unset attributes" do
       expect(target.config_errors).to have_key(".foo")
     end
 
-    it "includes attributes that have been set to nil" do
+    it "includes attributes set to nil" do
       target.foo = nil
+      target.port = nil
       expect(target.config_errors).to have_key(".foo")
+      expect(target.config_errors).to have_key(".port")
     end
 
-    it "excludes attributes that have been set non-nil" do
+    it "excludes attributes set non-nil" do
       target.bar = "something"
       expect(target.config_errors).not_to have_key(".bar")
     end
 
-    it "excludes attributes that have defaults" do
-      expect(target.config_errors).not_to have_key(".baz")
+    it "excludes attributes that have :default nil" do
+      expect(target.config_errors).not_to have_key(".port")
     end
 
     it "includes component attributes" do
