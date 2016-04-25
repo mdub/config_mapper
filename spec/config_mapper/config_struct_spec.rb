@@ -57,7 +57,7 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
-    context "with :default nil" do
+    context "optional" do
 
       with_target_class do
         attribute :port, :default => nil, &method(:Integer)
@@ -189,8 +189,8 @@ describe ConfigMapper::ConfigStruct do
       expect(target.config_errors).not_to have_key(".bar")
     end
 
-    it "excludes attributes that have :default nil" do
-      expect(target.config_errors).not_to have_key(".port")
+    it "excludes optional attributes" do
+      expect(target.config_errors).not_to have_key(".perhaps")
     end
 
     it "includes component attributes" do
