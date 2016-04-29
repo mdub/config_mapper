@@ -232,4 +232,52 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
+  describe "#to_h" do
+
+    with_target_class do
+      attribute :name
+      attribute :port, :default => 80
+      component :position do
+        attribute :x
+        attribute :y
+      end
+      component_dict :services do
+        attribute :port
+      end
+    end
+
+    it "includes attribute values" do
+      target.name = "Jim"
+      expect(target.to_h).to include("name" => "Jim")
+    end
+
+    it "includes defaults" do
+      expect(target.to_h).to include("port" => 80)
+    end
+
+    it "includes components" do
+      target.position.x = 123
+      expected = {
+        "position" => {
+          "x" => 123,
+          "y" => nil
+        }
+      }
+      expect(target.to_h).to include(expected)
+    end
+
+    it "includes component_dicts" do
+      target.services["foo"].port = 5678
+      expected = {
+        "services" => {
+          "foo" => {
+            "port" => 5678
+          }
+        }
+      }
+      expect(target.to_h).to include(expected)
+    end
+
+  end
+
 end

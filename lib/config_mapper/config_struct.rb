@@ -24,11 +24,12 @@ module ConfigMapper
       def attribute(name, options = {})
         name = name.to_sym
         required = true
+        default_value = nil
         if options.key?(:default)
           default_value = options.fetch(:default).freeze
           required = false if default_value.nil?
-          attribute_initializers[name] = proc { default_value }
         end
+        attribute_initializers[name] = proc { default_value }
         required_attributes << name if required
         attr_reader(name)
         define_method("#{name}=") do |value|
@@ -125,6 +126,20 @@ module ConfigMapper
     def configure_with(attribute_values)
       errors = ConfigMapper.configure_with(attribute_values, self)
       config_errors.merge(errors)
+    end
+
+    # Return the configuration as a Hash.
+    #
+    # @return [Hash] serializable config data
+    #
+    def to_h
+      {}.tap do |result|
+        self.class.attribute_initializers.keys.each do |attr_name|
+          value = send(attr_name)
+          value = value.to_h if value && value.respond_to?(:to_h)
+          result[attr_name.to_s] = value
+        end
+      end
     end
 
     private
