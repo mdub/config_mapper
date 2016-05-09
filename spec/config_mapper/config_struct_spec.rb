@@ -244,6 +244,7 @@ describe ConfigMapper::ConfigStruct do
       component_dict :services do
         attribute :port
       end
+      attribute :words
     end
 
     it "includes attribute values" do
@@ -278,6 +279,13 @@ describe ConfigMapper::ConfigStruct do
       expect(target.to_h).to include(expected)
     end
 
+    it "does sensible things with arrays" do
+      target.words = ["blah"]
+      expected = {
+        "words" => ["blah"]
+      }
+      expect(target.to_h).to include(expected)
+    end
   end
 
 end

@@ -136,7 +136,9 @@ module ConfigMapper
       {}.tap do |result|
         self.class.attribute_initializers.keys.each do |attr_name|
           value = send(attr_name)
-          value = value.to_h if value && value.respond_to?(:to_h)
+          if value && value.respond_to?(:to_h) && !value.is_a?(Array)
+            value = value.to_h
+          end
           result[attr_name.to_s] = value
         end
       end
