@@ -44,6 +44,9 @@ Style/FileName:
 Style/HashSyntax:
   EnforcedStyle: hash_rockets
 
+Style/Lambda:
+  Enabled: false
+
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 

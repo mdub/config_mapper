@@ -1,5 +1,5 @@
 module ConfigMapper
 
-  VERSION = "1.1.1"
+  VERSION = "1.1.1".freeze
 
 end

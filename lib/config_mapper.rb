@@ -25,7 +25,7 @@ module ConfigMapper
       mapper_for(target).configure_with(data)
     end
 
-    alias_method :set, :configure_with
+    alias set configure_with
 
     def mapper_for(target)
       if target.is_a?(Hash) || target.is_a?(ConfigMapper::ConfigDict)
