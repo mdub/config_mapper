@@ -22,6 +22,10 @@ module ConfigMapper
       @object.public_send("#{key}=", value)
     end
 
+    def can_set?(key)
+      @object.respond_to?("#{key}=")
+    end
+
   end
 
 end

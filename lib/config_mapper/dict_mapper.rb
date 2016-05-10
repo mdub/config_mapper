@@ -22,6 +22,10 @@ module ConfigMapper
       @hash[key] = value
     end
 
+    def can_set?(key)
+      @hash.respond_to?("[]=")
+    end
+
   end
 
 end

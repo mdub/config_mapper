@@ -22,13 +22,13 @@ module ConfigMapper
     #
     def configure_attribute(key, value, errors)
       attribute_path = path(key)
-      if value.is_a?(Hash) && !get(key).nil?
+      if can_set?(key)
+        set(key, value)
+      else
         nested_errors = ConfigMapper.configure_with(value, get(key))
         nested_errors.each do |nested_path, error|
           errors["#{attribute_path}#{nested_path}"] = error
         end
-      else
-        set(key, value)
       end
     rescue NoMethodError, ArgumentError => e
       errors[attribute_path] = e

@@ -34,6 +34,16 @@ module Testy
 
   end
 
+  class ThingWithAHash
+
+    def initialize
+      @stuff = { "foo" => "bar "}
+    end
+
+    attr_accessor :stuff
+
+  end
+
 end
 
 describe ConfigMapper do
@@ -71,24 +81,48 @@ describe ConfigMapper do
 
     context "with a nested Hash" do
 
-      let(:state) { Testy::State.new }
-      let(:target) { state }
+      context "if there is a writer method" do
 
-      let(:source_data) do
-        {
-          "position" => {
-            "x" => 1,
-            "y" => "juan"
+        let(:thing) { Testy::ThingWithAHash.new }
+        let(:target) { thing }
+
+        let(:source_data) do
+          {
+            "thing" => {
+              "x" => 1,
+              "y" => 2
+            }
           }
-        }
+        end
+
+        it "overwrites the Hash" do
+          expect(thing.stuff).to eql("x" => 1, "y" => 2)
+        end
+
       end
 
-      it "sets recognised attributes" do
-        expect(state.position.x).to eql(1)
-      end
+      context "otherwise" do
 
-      it "records errors raised by nested objects" do
-        expect(errors[".position.y"]).to be_a(ArgumentError)
+        let(:state) { Testy::State.new }
+        let(:target) { state }
+
+        let(:source_data) do
+          {
+            "position" => {
+              "x" => 1,
+              "y" => "juan"
+            }
+          }
+        end
+
+        it "sets recognised attributes" do
+          expect(state.position.x).to eql(1)
+        end
+
+        it "records errors raised by nested objects" do
+          expect(errors[".position.y"]).to be_a(ArgumentError)
+        end
+
       end
 
     end
