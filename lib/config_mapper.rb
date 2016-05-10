@@ -28,7 +28,7 @@ module ConfigMapper
     alias set configure_with
 
     def mapper_for(target)
-      if target.is_a?(Hash) || target.is_a?(ConfigMapper::ConfigDict)
+      if target.respond_to?(:[]) && target.respond_to?(:key?)
         DictMapper.new(target)
       else
         ObjectMapper.new(target)

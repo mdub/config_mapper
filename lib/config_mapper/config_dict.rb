@@ -25,7 +25,7 @@ module ConfigMapper
 
     extend Forwardable
 
-    def_delegators :@entries, :each, :empty?, :keys, :map, :size
+    def_delegators :@entries, :each, :empty?, :key?, :keys, :map, :size
 
     include Enumerable
 

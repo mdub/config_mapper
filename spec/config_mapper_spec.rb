@@ -28,6 +28,22 @@ module Testy
 
   end
 
+  class NamedPositions
+
+    def initialize
+      @positions_by_name = {}
+    end
+
+    def [](name)
+      @positions_by_name[name] ||= Position.new
+    end
+
+    def key?(name)
+      @positions_by_name.key?(name)
+    end
+
+  end
+
   class ThingWithSubnets
 
     attr_accessor :subnets
@@ -37,7 +53,7 @@ module Testy
   class ThingWithAHash
 
     def initialize
-      @stuff = { "foo" => "bar "}
+      @stuff = { "foo" => "bar" }
     end
 
     attr_accessor :stuff
@@ -88,7 +104,7 @@ describe ConfigMapper do
 
         let(:source_data) do
           {
-            "thing" => {
+            "stuff" => {
               "x" => 1,
               "y" => 2
             }
@@ -97,6 +113,10 @@ describe ConfigMapper do
 
         it "overwrites the Hash" do
           expect(thing.stuff).to eql("x" => 1, "y" => 2)
+        end
+
+        it "records no errors" do
+          expect(errors).to be_empty
         end
 
       end
@@ -147,7 +167,10 @@ describe ConfigMapper do
 
     end
 
-    context "when the target is a Hash" do
+    context "when the target is a read-only collection" do
+
+      let(:positions) { Testy::NamedPositions.new }
+      let(:target) { positions }
 
       let(:source_data) do
         {
@@ -156,38 +179,15 @@ describe ConfigMapper do
         }
       end
 
-      context "and contains an entry for the key" do
-
-        let(:positions) do
-          Hash.new do |h, k|
-            h[k] = Testy::Position.new
-          end
-        end
-        let(:target) { positions }
-
-        it "maps onto the object found" do
-          expect(positions["stan"].x).to eq(1)
-        end
-
-        it "records errors raised by nested objects" do
-          bad_attitude = '["mary"].attitude'
-          expect(errors.keys).to include(bad_attitude)
-          expect(errors[bad_attitude]).to be_a(NoMethodError)
-        end
-
+      it "maps onto the object found" do
+        expect(positions["stan"].x).to eq(1)
       end
 
-      context "and doesn't contain an entry for the key" do
-
-        let(:positions) do
-          Hash.new
-        end
-        let(:target) { positions }
-
-        it "injects the Hash of data" do
-          expect(positions["stan"]).to eq("x" => 1, "y" => 2)
-        end
-
+      it "records errors raised by nested objects" do
+        p errors
+        bad_attitude = '["mary"].attitude'
+        expect(errors.keys).to include(bad_attitude)
+        expect(errors[bad_attitude]).to be_a(NoMethodError)
       end
 
     end
