@@ -1,5 +1,5 @@
+require "config_mapper/collection_mapper"
 require "config_mapper/config_dict"
-require "config_mapper/dict_mapper"
 require "config_mapper/object_mapper"
 
 # Supports marshalling of plain-old data (e.g. loaded from
@@ -28,8 +28,8 @@ module ConfigMapper
     alias set configure_with
 
     def mapper_for(target)
-      if target.respond_to?(:[]) && target.respond_to?(:key?)
-        DictMapper.new(target)
+      if target.respond_to?(:[]) && target.respond_to?(:each)
+        CollectionMapper.new(target)
       else
         ObjectMapper.new(target)
       end

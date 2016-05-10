@@ -38,8 +38,8 @@ module Testy
       @positions_by_name[name] ||= Position.new
     end
 
-    def key?(name)
-      @positions_by_name.key?(name)
+    def each(&block)
+      @positions_by_name.each(&block)
     end
 
   end

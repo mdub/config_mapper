@@ -2,9 +2,9 @@ require "config_mapper/mapper"
 
 module ConfigMapper
 
-  # Configuration proxy for a Hash.
+  # Configuration proxy for a collection (e.g. Hash, Array, ConfigDict)
   #
-  class DictMapper < Mapper
+  class CollectionMapper < Mapper
 
     def initialize(hash)
       @hash = hash
