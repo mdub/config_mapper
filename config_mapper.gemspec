@@ -14,8 +14,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["mdub@dogbiscuit.org"]
   spec.homepage      = "https://github.com/mdub/config_mapper"
 
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
-  spec.test_files    = spec.files.grep(%r{^spec/})
+  spec.files         = Dir.glob("lib/**/*") + %w(README.md LICENSE.txt)
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "bundler", "~> 1.10"
