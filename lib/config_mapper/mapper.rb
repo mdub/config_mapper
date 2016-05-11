@@ -10,6 +10,9 @@ module ConfigMapper
     #
     def configure_with(data)
       errors = {}
+      if Array === data
+        data = data.each_with_index.to_a.map(&:reverse).to_h
+      end
       data.each do |key, value|
         configure_attribute(key, value, errors)
       end

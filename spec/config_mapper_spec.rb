@@ -189,6 +189,28 @@ describe ConfigMapper do
         expect(errors[bad_attitude]).to be_a(NoMethodError)
       end
 
+      context "and the config data is an Array" do
+
+        let(:source_data) do
+          [
+            { "x" => 3, "y" => 4 },
+            { "x" => 5, "y" => 6, "attitude" => "unknown" }
+          ]
+        end
+
+        it "uses array index as a key" do
+          expect(positions[0].x).to eq(3)
+          expect(positions[0].y).to eq(4)
+        end
+
+        it "records errors raised by nested objects" do
+          bad_attitude = '[1].attitude'
+          expect(errors.keys).to include(bad_attitude)
+          expect(errors[bad_attitude]).to be_a(NoMethodError)
+        end
+
+      end
+
     end
 
   end
