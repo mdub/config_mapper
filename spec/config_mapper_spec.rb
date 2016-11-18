@@ -59,10 +59,10 @@ describe ConfigMapper, ".configure_with" do
 
   context "targeting a simple object" do
 
-    context "with a simple hash" do
+    let(:position) { Testy::Position.new }
+    let(:target) { position }
 
-      let(:position) { Testy::Position.new }
-      let(:target) { position }
+    context "with a simple hash" do
 
       let(:source_data) do
         {
@@ -82,6 +82,19 @@ describe ConfigMapper, ".configure_with" do
 
       it "records NoMethodErrors for unrecognised keys" do
         expect(errors[".z"]).to be_a(NoMethodError)
+      end
+
+    end
+
+    context "with an array" do
+
+      let(:source_data) do
+        %w(a b c)
+      end
+
+      it "records NoMethodErrors for array indices" do
+        expect(errors[".0"]).to be_a(NoMethodError)
+        expect(errors[".2"]).to be_a(NoMethodError)
       end
 
     end

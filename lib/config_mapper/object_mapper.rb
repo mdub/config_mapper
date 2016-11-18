@@ -15,7 +15,7 @@ module ConfigMapper
     end
 
     def get(key)
-      @object.public_send(key)
+      @object.public_send(key.to_s)
     end
 
     def set(key, value)
