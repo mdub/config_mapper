@@ -156,7 +156,7 @@ describe ConfigMapper::ConfigStruct do
       end
 
       it "invokes the key_type Proc to validate keys" do
-        expect { target.allow_access_on["abc"] }.to raise_error
+        expect { target.allow_access_on["abc"] }.to raise_error(ArgumentError)
         expect { target.allow_access_on["22"] }.not_to raise_error
         expect(target.allow_access_on.keys).to eql([22])
       end

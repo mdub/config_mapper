@@ -202,7 +202,7 @@ describe ConfigMapper, ".configure_with" do
       end
 
       it "records errors raised by nested objects" do
-        bad_attitude = '[1].attitude'
+        bad_attitude = "[1].attitude"
         expect(errors.keys).to include(bad_attitude)
         expect(errors[bad_attitude]).to be_a(NoMethodError)
       end
