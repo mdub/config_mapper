@@ -44,19 +44,10 @@ module Testy
 
   end
 
-  class ThingWithSubnets
+  class Thing
 
-    attr_accessor :subnets
-
-  end
-
-  class ThingWithAHash
-
-    def initialize
-      @stuff = { "foo" => "bar" }
-    end
-
-    attr_accessor :stuff
+    attr_accessor :foo
+    attr_accessor :bar
 
   end
 
@@ -66,51 +57,50 @@ describe ConfigMapper, ".configure_with" do
 
   let!(:errors) { described_class.configure_with(source_data, target) }
 
-  context "with a simple Hash" do
+  context "targeting a simple object" do
 
-    let(:position) { Testy::Position.new }
-    let(:target) { position }
+    context "with a simple hash" do
 
-    let(:source_data) do
-      {
-        "x" => 1,
-        "y" => "juan",
-        "z" => 42
-      }
+      let(:position) { Testy::Position.new }
+      let(:target) { position }
+
+      let(:source_data) do
+        {
+          "x" => 1,
+          "y" => "juan",
+          "z" => 42
+        }
+      end
+
+      it "sets recognised attributes" do
+        expect(position.x).to eql(1)
+      end
+
+      it "records ArgumentErrors raised by setter-methods" do
+        expect(errors[".y"]).to be_a(ArgumentError)
+      end
+
+      it "records NoMethodErrors for unrecognised keys" do
+        expect(errors[".z"]).to be_a(NoMethodError)
+      end
+
     end
 
-    it "sets recognised attributes" do
-      expect(position.x).to eql(1)
-    end
+    context "with complex data" do
 
-    it "records ArgumentErrors raised by setter-methods" do
-      expect(errors[".y"]).to be_a(ArgumentError)
-    end
-
-    it "records NoMethodErrors for unrecognised keys" do
-      expect(errors[".z"]).to be_a(NoMethodError)
-    end
-
-  end
-
-  context "with a nested Hash" do
-
-    context "if there is a writer method" do
-
-      let(:thing) { Testy::ThingWithAHash.new }
+      let(:thing) { Testy::Thing.new }
       let(:target) { thing }
 
       let(:source_data) do
         {
-          "stuff" => {
-            "x" => 1,
-            "y" => 2
-          }
+          "foo" => { "x" => 1, "y" => 2 },
+          "bar" => ["a", "b", "c"]
         }
       end
 
-      it "overwrites the Hash" do
-        expect(thing.stuff).to eql("x" => 1, "y" => 2)
+      it "just sets the attributes" do
+        expect(thing.foo).to eql("x" => 1, "y" => 2)
+        expect(thing.bar).to eql(["a", "b", "c"])
       end
 
       it "records no errors" do
@@ -119,10 +109,14 @@ describe ConfigMapper, ".configure_with" do
 
     end
 
-    context "otherwise" do
+  end
 
-      let(:state) { Testy::State.new }
-      let(:target) { state }
+  context "targeting a complex object" do
+
+    let(:state) { Testy::State.new }
+    let(:target) { state }
+
+    context "with nested hashes" do
 
       let(:source_data) do
         {
@@ -145,49 +139,33 @@ describe ConfigMapper, ".configure_with" do
 
   end
 
-  context "with an Array of values" do
-
-    let(:thing) { Testy::ThingWithSubnets.new }
-    let(:target) { thing }
-
-    let(:source_data) do
-      {
-        :subnets => [
-          "subnet-1",
-          "subnet-2"
-        ]
-      }
-    end
-
-    it "sets the Array value" do
-      expect(thing.subnets).to eql(%w(subnet-1 subnet-2))
-    end
-
-  end
-
-  context "when the target is a read-only collection" do
+  context "targeting a read-only collection" do
 
     let(:positions) { Testy::NamedPositions.new }
     let(:target) { positions }
 
-    let(:source_data) do
-      {
-        "stan" => { "x" => 1, "y" => 2 },
-        "mary" => { "x" => 5, "y" => 6, "attitude" => "unknown" }
-      }
+    context "with nested hashes" do
+
+      let(:source_data) do
+        {
+          "stan" => { "x" => 1, "y" => 2 },
+          "mary" => { "x" => 5, "y" => 6, "attitude" => "unknown" }
+        }
+      end
+
+      it "maps onto the object found" do
+        expect(positions["stan"].x).to eq(1)
+      end
+
+      it "records errors raised by nested objects" do
+        bad_attitude = '["mary"].attitude'
+        expect(errors.keys).to include(bad_attitude)
+        expect(errors[bad_attitude]).to be_a(NoMethodError)
+      end
+
     end
 
-    it "maps onto the object found" do
-      expect(positions["stan"].x).to eq(1)
-    end
-
-    it "records errors raised by nested objects" do
-      bad_attitude = '["mary"].attitude'
-      expect(errors.keys).to include(bad_attitude)
-      expect(errors[bad_attitude]).to be_a(NoMethodError)
-    end
-
-    context "and the config data is an Array" do
+    context "with an array" do
 
       let(:source_data) do
         [
