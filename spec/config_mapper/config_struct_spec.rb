@@ -288,4 +288,32 @@ describe ConfigMapper::ConfigStruct do
     end
   end
 
+  describe "sub-class" do
+
+    let(:super_class) do
+      Class.new(ConfigMapper::ConfigStruct) do
+        attribute :name
+      end
+    end
+
+    let(:sub_class) do
+      Class.new(super_class) do
+        attribute :description
+      end
+    end
+
+    let(:target) { sub_class.new }
+
+    it "supports attributes of super-class" do
+      target.name = "bob"
+      expect(target.name).to eql("bob")
+    end
+
+    it "returns config_errors" do
+      pending
+      expect(target.config_errors.keys).to include(".name", ".description")
+    end
+
+  end
+
 end
