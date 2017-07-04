@@ -292,7 +292,20 @@ describe ConfigMapper::ConfigStruct do
 
     let(:super_class) do
       Class.new(ConfigMapper::ConfigStruct) do
+
         attribute :name
+
+        attribute :port, :default => 5000
+
+        component :position do
+          attribute :x
+          attribute :y
+        end
+
+        component_dict :containers do
+          attribute :image
+        end
+
       end
     end
 
@@ -304,14 +317,23 @@ describe ConfigMapper::ConfigStruct do
 
     let(:target) { sub_class.new }
 
-    it "supports attributes of super-class" do
+    it "inherits attributes from super-class" do
+      expect(target.config_errors.keys).to include(".name")
       target.name = "bob"
       expect(target.name).to eql("bob")
     end
 
-    it "returns config_errors" do
-      pending
-      expect(target.config_errors.keys).to include(".name", ".description")
+    it "inherits defaults" do
+      expect(target.port).to eql(5000)
+    end
+
+    it "inherits components from super-class" do
+      expect(target.position).to be_kind_of(ConfigMapper::ConfigStruct)
+      expect(target.config_errors.keys).to include(".position.x")
+    end
+
+    it "inherits component_dicts from super-class" do
+      expect(target.containers).to be_kind_of(ConfigMapper::ConfigDict)
     end
 
   end

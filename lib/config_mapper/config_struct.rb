@@ -105,8 +105,10 @@ module ConfigMapper
     end
 
     def initialize
-      self.class.attribute_initializers.each do |name, initializer|
-        instance_variable_set("@#{name}", initializer.call)
+      config_struct_ancestors.each do |klass|
+        klass.attribute_initializers.each do |name, initializer|
+          instance_variable_set("@#{name}", initializer.call)
+        end
       end
     end
 
@@ -134,26 +136,34 @@ module ConfigMapper
     #
     def to_h
       {}.tap do |result|
-        self.class.attribute_initializers.keys.each do |attr_name|
-          value = send(attr_name)
-          if value && value.respond_to?(:to_h) && !value.is_a?(Array)
-            value = value.to_h
+        config_struct_ancestors.each do |klass|
+          klass.attribute_initializers.keys.each do |attr_name|
+            value = send(attr_name)
+            if value && value.respond_to?(:to_h) && !value.is_a?(Array)
+              value = value.to_h
+            end
+            result[attr_name.to_s] = value
           end
-          result[attr_name.to_s] = value
         end
       end
     end
 
     private
 
+    def config_struct_ancestors
+      self.class.ancestors.take_while { |c| c != ConfigStruct }
+    end
+
     def components
       {}.tap do |result|
-        self.class.declared_components.each do |name|
-          result[".#{name}"] = instance_variable_get("@#{name}")
-        end
-        self.class.declared_component_dicts.each do |name|
-          instance_variable_get("@#{name}").each do |key, value|
-            result[".#{name}[#{key.inspect}]"] = value
+        config_struct_ancestors.each do |klass|
+          klass.declared_components.each do |name|
+            result[".#{name}"] = instance_variable_get("@#{name}")
+          end
+          klass.declared_component_dicts.each do |name|
+            instance_variable_get("@#{name}").each do |key, value|
+              result[".#{name}[#{key.inspect}]"] = value
+            end
           end
         end
       end
@@ -169,9 +179,11 @@ module ConfigMapper
 
     def missing_required_attribute_errors
       {}.tap do |errors|
-        self.class.required_attributes.each do |name|
-          if instance_variable_get("@#{name}").nil?
-            errors[".#{name}"] = NoValueProvided.new
+        config_struct_ancestors.each do |klass|
+          klass.required_attributes.each do |name|
+            if instance_variable_get("@#{name}").nil?
+              errors[".#{name}"] = NoValueProvided.new
+            end
           end
         end
       end
