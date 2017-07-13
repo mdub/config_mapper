@@ -26,7 +26,9 @@ describe ConfigMapper::ConfigStruct do
     context "with a block" do
 
       with_target_class do
-        attribute :size { |arg| Integer(arg) }
+        attribute :size do |arg|
+          Integer(arg)
+        end
       end
 
       it "uses the block to validate the value" do
