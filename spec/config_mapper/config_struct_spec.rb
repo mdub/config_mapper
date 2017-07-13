@@ -26,7 +26,7 @@ describe ConfigMapper::ConfigStruct do
     context "with a block" do
 
       with_target_class do
-        attribute(:size) { |arg| Integer(arg) }
+        attribute :size { |arg| Integer(arg) }
       end
 
       it "uses the block to validate the value" do
@@ -36,6 +36,31 @@ describe ConfigMapper::ConfigStruct do
       it "assigns the block's return value to the attribute" do
         target.size = "456"
         expect(target.size).to eql(456)
+      end
+
+    end
+
+    context "with a :type" do
+
+      case_insensitive_string = ->(arg) do
+        if arg.respond_to?(:upcase)
+          arg.upcase
+        else
+          raise ArgumentError, "not a String"
+        end
+      end
+
+      with_target_class do
+        attribute :name, :type => case_insensitive_string
+      end
+
+      it "uses the block to validate the value" do
+        expect { target.name = 22 }.to raise_error(ArgumentError)
+      end
+
+      it "assigns the block's return value to the attribute" do
+        target.name = "Mike"
+        expect(target.name).to eql("MIKE")
       end
 
     end

@@ -21,10 +21,11 @@ module ConfigMapper
       # @options options [String] :default (nil) default value
       # @yield type-coercion block
       #
-      def attribute(name, options = {})
+      def attribute(name, options = {}, &type_block)
         name = name.to_sym
         required = true
         default_value = nil
+        type = options.fetch(:type, type_block)
         if options.key?(:default)
           default_value = options.fetch(:default).freeze
           required = false if default_value.nil?
@@ -36,7 +37,7 @@ module ConfigMapper
           if value.nil?
             raise NoValueProvided if required
           else
-            value = yield(value) if block_given?
+            value = type.call(value) if type
           end
           instance_variable_set("@#{name}", value)
         end
