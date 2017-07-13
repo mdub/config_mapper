@@ -1,7 +1,7 @@
 # ConfigMapper
 
-[![Gem Version](https://badge.fury.io/rb/config_mapper.png)](http://badge.fury.io/rb/config_mapper)
-[![Build Status](https://secure.travis-ci.org/mdub/config_mapper.png?branch=master)](http://travis-ci.org/mdub/config_mapper)
+[![Gem Version](https://badge.fury.io/rb/config_mapper.svg)](https://badge.fury.io/rb/config_mapper)
+[![Build Status](https://travis-ci.org/mdub/config_mapper.svg?branch=master)](https://travis-ci.org/mdub/config_mapper)
 
 ConfigMapper maps configuration data onto Ruby objects.
 
