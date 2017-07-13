@@ -18,16 +18,16 @@ module ConfigMapper
       # validate the argument.
       #
       # @param name [Symbol] attribute name
-      # @options options [String] :default (nil) default value
+      # @param default default value
       # @yield type-coercion block
       #
-      def attribute(name, options = {}, &type_block)
+      def attribute(name, type: nil, default: :no_default, &type_block)
         name = name.to_sym
         required = true
         default_value = nil
-        type = options.fetch(:type, type_block)
-        if options.key?(:default)
-          default_value = options.fetch(:default).freeze
+        type ||= type_block
+        unless default == :no_default
+          default_value = default.freeze
           required = false if default_value.nil?
         end
         attribute_initializers[name] = proc { default_value }
@@ -49,13 +49,11 @@ module ConfigMapper
       # sub-components class.
       #
       # @param name [Symbol] component name
-      # @options options [String] :type (ConfigMapper::ConfigStruct)
-      #   component base-class
+      # @param type [Class] component base-class
       #
-      def component(name, options = {}, &block)
+      def component(name, type: ConfigStruct, &block)
         name = name.to_sym
         declared_components << name
-        type = options.fetch(:type, ConfigStruct)
         type = Class.new(type, &block) if block
         type = type.method(:new) if type.respond_to?(:new)
         attribute_initializers[name] = type
@@ -68,18 +66,14 @@ module ConfigMapper
       # sub-components class.
       #
       # @param name [Symbol] dictionary attribute name
-      # @options options [Proc] :key_type
-      #   function used to validate keys
-      # @options options [String] :type (ConfigMapper::ConfigStruct)
-      #   base-class for sub-component values
+      # @param type [Class] base-class for component values
+      # @param key_type [Proc] function used to validate keys
       #
-      def component_dict(name, options = {}, &block)
+      def component_dict(name, type: ConfigStruct, key_type: nil, &block)
         name = name.to_sym
         declared_component_dicts << name
-        type = options.fetch(:type, ConfigStruct)
         type = Class.new(type, &block) if block
         type = type.method(:new) if type.respond_to?(:new)
-        key_type = options[:key_type]
         key_type = key_type.method(:new) if key_type.respond_to?(:new)
         attribute_initializers[name] = lambda do
           ConfigDict.new(type, key_type)
