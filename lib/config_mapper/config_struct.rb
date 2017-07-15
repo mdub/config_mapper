@@ -25,7 +25,7 @@ module ConfigMapper
         name = name.to_sym
         required = true
         default_value = nil
-        type ||= type_block
+        type = resolve_type(type, type_block)
         unless default == :no_default
           default_value = default.freeze
           required = false if default_value.nil?
@@ -102,6 +102,15 @@ module ConfigMapper
           next unless klass.respond_to?(attribute)
           klass.public_send(attribute).each(&action)
         end
+      end
+
+      private
+
+      def resolve_type(type, type_block)
+        return type_block if type_block
+        return nil if type.nil?
+        return type if type.respond_to?(:call)
+        Kernel.method(type.name)
       end
 
     end

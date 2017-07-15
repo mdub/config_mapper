@@ -1,3 +1,4 @@
+require "bigdecimal"
 require "config_mapper/config_struct"
 
 describe ConfigMapper::ConfigStruct do
@@ -63,6 +64,25 @@ describe ConfigMapper::ConfigStruct do
       it "assigns the block's return value to the attribute" do
         target.name = "Mike"
         expect(target.name).to eql("MIKE")
+      end
+
+    end
+
+    context "with built-in type" do
+
+      with_target_class do
+        attribute :count, Integer
+        attribute :length, Float
+      end
+
+      it "uses the corresonding coercion method" do
+
+        target.count = "23"
+        expect(target.count).to be(23)
+
+        target.length = "23"
+        expect(target.length).to be(23.0)
+
       end
 
     end
