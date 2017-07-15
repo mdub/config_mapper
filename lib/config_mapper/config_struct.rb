@@ -21,7 +21,7 @@ module ConfigMapper
       # @param default default value
       # @yield type-coercion block
       #
-      def attribute(name, type: nil, default: :no_default, &type_block)
+      def attribute(name, type = nil, default: :no_default, &type_block)
         name = name.to_sym
         required = true
         default_value = nil

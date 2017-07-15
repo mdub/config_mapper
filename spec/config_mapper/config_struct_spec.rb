@@ -42,7 +42,7 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
-    context "with a :type" do
+    context "with a type" do
 
       case_insensitive_string = ->(arg) do
         if arg.respond_to?(:upcase)
@@ -53,7 +53,7 @@ describe ConfigMapper::ConfigStruct do
       end
 
       with_target_class do
-        attribute :name, :type => case_insensitive_string
+        attribute :name, case_insensitive_string
       end
 
       it "uses the block to validate the value" do
