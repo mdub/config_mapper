@@ -23,24 +23,32 @@ module ConfigMapper
       #
       def attribute(name, type = nil, default: :no_default, &type_block)
         name = name.to_sym
+
         required = true
         default_value = nil
-        type = resolve_type(type, type_block)
         unless default == :no_default
           default_value = default.freeze
           required = false if default_value.nil?
         end
         attribute_initializers[name] = proc { default_value }
         required_attributes << name if required
+
+        validator = type || type_block
+        if !validator.respond_to?(:call) && validator.respond_to?(:name)
+          # looks like a primitive class -- find the corresponding coercion method
+          validator = Kernel.method(type.name)
+        end
+
         attr_reader(name)
         define_method("#{name}=") do |value|
           if value.nil?
             raise NoValueProvided if required
           else
-            value = type.call(value) if type
+            value = validator.call(value) if validator
           end
           instance_variable_set("@#{name}", value)
         end
+
       end
 
       # Defines a sub-component.
@@ -102,15 +110,6 @@ module ConfigMapper
           next unless klass.respond_to?(attribute)
           klass.public_send(attribute).each(&action)
         end
-      end
-
-      private
-
-      def resolve_type(type, type_block)
-        return type_block if type_block
-        return nil if type.nil?
-        return type if type.respond_to?(:call)
-        Kernel.method(type.name)
       end
 
     end
