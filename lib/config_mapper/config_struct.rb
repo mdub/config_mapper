@@ -89,6 +89,14 @@ module ConfigMapper
         attr_reader name
       end
 
+      def documentation
+        {}.tap do |doc|
+          for_all(:attribute_initializers) do |name, _|
+            doc[".#{name}"] ||= {}
+          end
+        end
+      end
+
       def required_attributes
         @required_attributes ||= []
       end

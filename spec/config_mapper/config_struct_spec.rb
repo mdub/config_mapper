@@ -212,6 +212,28 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
+  describe ".documentation" do
+
+    with_target_class do
+      attribute :flavour
+      attribute :scoops, Integer
+    end
+
+    let(:documentation) { target_class.documentation }
+
+    it "returns data for each attribute" do
+      expect(documentation).to have_key(".flavour")
+      expect(documentation).to have_key(".scoops")
+    end
+
+    it "returns type information, where known" do
+      pending
+      expect(documentation.dig(".flavour")).to_not include("type")
+      expect(documentation.dig(".scoops", "type")).to eql("Integer")
+    end
+
+  end
+
   describe "#config_errors" do
 
     with_target_class do
