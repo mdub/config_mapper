@@ -5,6 +5,22 @@
 
 ConfigMapper maps configuration data onto Ruby objects.
 
+<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Usage](#usage)
+	- [Target object](#target-object)
+	- [Errors](#errors)
+- [ConfigStruct](#configstruct)
+	- [Attributes](#attributes)
+	- [Type validation/coercion](#type-validationcoercion)
+	- [Defaults](#defaults)
+	- [Semantic errors](#semantic-errors)
+- [License](#license)
+- [Contributing](#contributing)
+- [See also](#see-also)
+
+<!-- /TOC -->
+
 ## Usage
 
 Imagine you have some Ruby objects:
@@ -116,9 +132,81 @@ ConfigMapper works pretty well with plain old Ruby objects, but we
 provide a base-class, `ConfigMapper::ConfigStruct`, with a DSL that
 makes it even easier to declare configuration data-structures.
 
+### Attributes
+
+The `attribute` method is similar to `attr_accessor`, defining both reader and writer methods for the named attribute.   
+
 ```ruby
 require "config_mapper/config_struct"
 
+class State < ConfigMapper::ConfigStruct
+
+  attribute :orientation
+
+end
+```
+
+### Type validation/coercion
+
+If you specify a block when declaring an attribute, it will be invoked as part of the attribute's writer-method, to validate values when they are set. It should expect a single argument, and raise `ArgumentError` to signal invalid input. As the return value will be used as the value of the attribute, it's also an opportunity coerce values into canonical form.
+
+```ruby
+class Server < ConfigMapper::ConfigStruct
+
+  attribute :host do |arg|
+    unless arg =~ /^\w+(\.\w+)+$/
+      raise ArgumentError, "invalid hostname: #{arg}"
+    end
+    arg
+  end
+
+	attribute :port do |arg|
+		Integer(arg)
+	end
+
+end
+```
+
+Alternatively, specify a "validator" as a second argument to `attribute`.  It should be an object that responds to `#call`, with the same semantics described above. Good choices include `Proc` or `Method` objects, or type-objects from the [dry-types](http://dry-rb.org/gems/dry-types/) project.
+
+```ruby
+class Server < ConfigMapper::ConfigStruct
+
+	attribute :host, Types::Strict::String.constrained(format: /^\w+(\.\w+)+$/)
+	attribute :port, method(:Integer)
+
+end
+```
+
+For convenience, primitive Ruby types such as `Integer` and `Float` can be used as shorthand for their namesake type-coercion methods on `Kernel`:
+
+```ruby
+class Server < ConfigMapper::ConfigStruct
+
+	attribute :port, Integer
+
+end
+```
+
+### Defaults
+
+Attributes can be given default values, e.g.
+
+```ruby
+class Address < ConfigMapper::ConfigStruct
+  attribute :host
+  attribute :port, :default => 80
+  attribute :path, :default => nil
+end
+```
+
+Specify a default value of `nil` to mark an attribute as optional. Attributes without a default are treated as "required".
+
+### Sub-components
+
+The `component` method defines a nested component object, itself a `ConfigStruct`.  
+
+```
 class State < ConfigMapper::ConfigStruct
 
   component :position do
@@ -126,10 +214,10 @@ class State < ConfigMapper::ConfigStruct
     attribute :y
   end
 
-  attribute :orientation
-
 end
 ```
+
+### Semantic errors
 
 `ConfigStruct#config_errors` returns errors for each unset mandatory attribute.
 
@@ -142,35 +230,6 @@ state.config_errors
 ```
 
 `#config_errors` can be overridden to provide custom semantic validation.
-
-Attributes can be given default values. Specify a default value of `nil` to mark an attribute as optional, e.g.
-
-```ruby
-class Address < ConfigMapper::ConfigStruct
-  attribute :host
-  attribute :port, :default => 80
-  attribute :path, :default => nil
-end
-```
-
-If a block is provided when an `attribute` is declared, it is used to validate values when they are set, and/or coerce them to a canonical type.  The block should raise `ArgumentError` to indicate an invalid value.
-
-```ruby
-class Server < ConfigMapper::ConfigStruct
-
-  attribute :host do |arg|
-    unless arg =~ /^\w+(\.\w+)+$/
-      raise ArgumentError, "invalid hostname: #{arg}"
-    end
-    arg
-  end
-
-  attribute :port do |arg|
-    Integer(arg)
-  end
-
-end
-```
 
 `ConfigStruct#configure_with` maps data into the object, and combines mapping errors and semantic errors (returned by `#config_errors`) into a single Hash:
 
