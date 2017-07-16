@@ -206,7 +206,7 @@ Specify a default value of `nil` to mark an attribute as optional. Attributes wi
 
 The `component` method defines a nested component object, itself a `ConfigStruct`.  
 
-```
+```ruby
 class State < ConfigMapper::ConfigStruct
 
   component :position do
