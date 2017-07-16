@@ -8,13 +8,13 @@ ConfigMapper maps configuration data onto Ruby objects.
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 - [Usage](#usage)
-	- [Target object](#target-object)
-	- [Errors](#errors)
+  - [Target object](#target-object)
+  - [Errors](#errors)
 - [ConfigStruct](#configstruct)
-	- [Attributes](#attributes)
-	- [Type validation/coercion](#type-validationcoercion)
-	- [Defaults](#defaults)
-	- [Semantic errors](#semantic-errors)
+  - [Attributes](#attributes)
+  - [Type validation/coercion](#type-validationcoercion)
+  - [Defaults](#defaults)
+  - [Semantic errors](#semantic-errors)
 - [License](#license)
 - [Contributing](#contributing)
 - [See also](#see-also)
@@ -160,9 +160,9 @@ class Server < ConfigMapper::ConfigStruct
     arg
   end
 
-	attribute :port do |arg|
-		Integer(arg)
-	end
+  attribute :port do |arg|
+    Integer(arg)
+  end
 
 end
 ```
@@ -172,8 +172,8 @@ Alternatively, specify a "validator" as a second argument to `attribute`.  It sh
 ```ruby
 class Server < ConfigMapper::ConfigStruct
 
-	attribute :host, Types::Strict::String.constrained(format: /^\w+(\.\w+)+$/)
-	attribute :port, method(:Integer)
+  attribute :host, Types::Strict::String.constrained(format: /^\w+(\.\w+)+$/)
+  attribute :port, method(:Integer)
 
 end
 ```
@@ -183,7 +183,7 @@ For convenience, primitive Ruby types such as `Integer` and `Float` can be used 
 ```ruby
 class Server < ConfigMapper::ConfigStruct
 
-	attribute :port, Integer
+  attribute :port, Integer
 
 end
 ```
