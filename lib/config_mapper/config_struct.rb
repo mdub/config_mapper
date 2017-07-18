@@ -25,13 +25,13 @@ module ConfigMapper
         attribute = attribute!(name)
 
         attribute.required = true
-        default_value = nil
+        attribute.default = nil
         unless default == :no_default
-          default_value = default.freeze
-          attribute.required = false if default_value.nil?
+          attribute.default = default.freeze
+          attribute.required = false if attribute.default.nil?
         end
 
-        attribute.initializer = proc { default_value }
+        attribute.initializer = proc { attribute.default }
         attribute.validator = resolve_validator(type || type_block)
 
         attr_reader(attribute.name)
@@ -226,8 +226,9 @@ module ConfigMapper
       attr_reader :name
 
       attr_accessor :initializer
-      attr_accessor :required
       attr_accessor :validator
+      attr_accessor :default
+      attr_accessor :required
 
     end
 
