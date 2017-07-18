@@ -33,11 +33,7 @@ module ConfigMapper
         attribute_initializers[name] = proc { default_value }
         required_attributes << name if required
 
-        validator = type || type_block
-        if !validator.respond_to?(:call) && validator.respond_to?(:name)
-          # looks like a primitive class -- find the corresponding coercion method
-          validator = Kernel.method(type.name)
-        end
+        validator = resolve_validator(type || type_block)
 
         attr_reader(name)
         define_method("#{name}=") do |value|
@@ -82,9 +78,8 @@ module ConfigMapper
         declared_component_dicts << name
         type = Class.new(type, &block) if block
         type = type.method(:new) if type.respond_to?(:new)
-        key_type = key_type.method(:new) if key_type.respond_to?(:new)
         attribute_initializers[name] = lambda do
-          ConfigDict.new(type, key_type)
+          ConfigDict.new(type, resolve_validator(key_type))
         end
         attr_reader name
       end
@@ -118,6 +113,15 @@ module ConfigMapper
           next unless klass.respond_to?(attribute)
           klass.public_send(attribute).each(&action)
         end
+      end
+
+      def resolve_validator(validator)
+        return validator if validator.respond_to?(:call)
+        if validator.respond_to?(:name)
+          # looks like a primitive class -- find the corresponding coercion method
+          return Kernel.method(validator.name)
+        end
+        validator
       end
 
     end

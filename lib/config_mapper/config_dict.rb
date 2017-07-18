@@ -4,15 +4,15 @@ module ConfigMapper
 
   class ConfigDict
 
-    def initialize(entry_type, key_type = nil)
-      @entry_type = entry_type
-      @key_type = key_type
+    def initialize(entry_factory, key_validator = nil)
+      @entry_factory = entry_factory
+      @key_validator = key_validator
       @entries = {}
     end
 
     def [](key)
-      key = @key_type.call(key) if @key_type
-      @entries[key] ||= @entry_type.call
+      key = @key_validator.call(key) if @key_validator
+      @entries[key] ||= @entry_factory.call
     end
 
     def to_h
