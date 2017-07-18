@@ -22,7 +22,6 @@ module ConfigMapper
       # @yield type-coercion block
       #
       def attribute(name, type = nil, default: :no_default, &type_block)
-        name = name.to_sym
         attribute = attribute!(name)
 
         attribute.required = true
@@ -33,17 +32,16 @@ module ConfigMapper
         end
 
         attribute.initializer = proc { default_value }
+        attribute.validator = resolve_validator(type || type_block)
 
-        validator = resolve_validator(type || type_block)
-
-        attr_reader(name)
-        define_method("#{name}=") do |value|
+        attr_reader(attribute.name)
+        define_method("#{attribute.name}=") do |value|
           if value.nil?
             raise NoValueProvided if attribute.required
           else
-            value = validator.call(value) if validator
+            value = attribute.validator.call(value) if attribute.validator
           end
-          instance_variable_set("@#{name}", value)
+          instance_variable_set("@#{attribute.name}", value)
         end
 
       end
@@ -57,13 +55,12 @@ module ConfigMapper
       # @param type [Class] component base-class
       #
       def component(name, type: ConfigStruct, &block)
-        name = name.to_sym
         attribute = attribute!(name)
-        declared_components << name
+        declared_components << attribute.name
         type = Class.new(type, &block) if block
         type = type.method(:new) if type.respond_to?(:new)
         attribute.initializer = type
-        attr_reader name
+        attr_reader(attribute.name)
       end
 
       # Defines an associative array of sub-components.
@@ -76,15 +73,14 @@ module ConfigMapper
       # @param key_type [Proc] function used to validate keys
       #
       def component_dict(name, type: ConfigStruct, key_type: nil, &block)
-        name = name.to_sym
         attribute = attribute!(name)
-        declared_component_dicts << name
+        declared_component_dicts << attribute.name
         type = Class.new(type, &block) if block
         type = type.method(:new) if type.respond_to?(:new)
         attribute.initializer = lambda do
           ConfigDict.new(type, resolve_validator(key_type))
         end
-        attr_reader name
+        attr_reader(attribute.name)
       end
 
       def documentation
@@ -224,13 +220,14 @@ module ConfigMapper
     class Attribute
 
       def initialize(name)
-        @name = name
+        @name = name.to_sym
       end
 
       attr_reader :name
 
       attr_accessor :initializer
       attr_accessor :required
+      attr_accessor :validator
 
     end
 
