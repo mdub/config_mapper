@@ -216,7 +216,7 @@ describe ConfigMapper::ConfigStruct do
 
     with_target_class do
       attribute :flavour
-      attribute :scoops, Integer
+      attribute :scoops, Integer, default: 2
     end
 
     let(:documentation) { target_class.documentation }
@@ -226,9 +226,14 @@ describe ConfigMapper::ConfigStruct do
       expect(documentation).to have_key(".scoops")
     end
 
-    it "returns type information, where known" do
+    it "includes type information, where known" do
       expect(documentation.dig(".flavour")).to_not include("type")
       expect(documentation.dig(".scoops", "type")).to eql("Integer")
+    end
+
+    it "returns defaults, where specified" do
+      expect(documentation.dig(".flavour")).to_not include("default")
+      expect(documentation.dig(".scoops", "default")).to eql(2)
     end
 
   end

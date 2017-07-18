@@ -87,6 +87,9 @@ module ConfigMapper
         {}.tap do |doc|
           for_all(:attributes) do |attribute|
             doc[".#{attribute.name}"] = {}.tap do |attr_doc|
+              if attribute.default
+                attr_doc["default"] = attribute.default
+              end
               if attribute.validator.respond_to?(:name)
                 attr_doc["type"] = String(attribute.validator.name)
               end
