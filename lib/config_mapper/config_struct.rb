@@ -23,6 +23,7 @@ module ConfigMapper
       #
       def attribute(name, type = nil, default: :no_default, &type_block)
         name = name.to_sym
+        attribute = attributes[name] = Attribute.new
 
         required = true
         default_value = nil
@@ -30,7 +31,8 @@ module ConfigMapper
           default_value = default.freeze
           required = false if default_value.nil?
         end
-        attribute_initializers[name] = proc { default_value }
+
+        attribute.initializer = proc { default_value }
         required_attributes << name if required
 
         validator = resolve_validator(type || type_block)
@@ -57,10 +59,11 @@ module ConfigMapper
       #
       def component(name, type: ConfigStruct, &block)
         name = name.to_sym
+        attribute = attributes[name] = Attribute.new
         declared_components << name
         type = Class.new(type, &block) if block
         type = type.method(:new) if type.respond_to?(:new)
-        attribute_initializers[name] = type
+        attribute.initializer = type
         attr_reader name
       end
 
@@ -75,10 +78,11 @@ module ConfigMapper
       #
       def component_dict(name, type: ConfigStruct, key_type: nil, &block)
         name = name.to_sym
+        attribute = attributes[name] = Attribute.new
         declared_component_dicts << name
         type = Class.new(type, &block) if block
         type = type.method(:new) if type.respond_to?(:new)
-        attribute_initializers[name] = lambda do
+        attribute.initializer = lambda do
           ConfigDict.new(type, resolve_validator(key_type))
         end
         attr_reader name
@@ -86,7 +90,7 @@ module ConfigMapper
 
       def documentation
         {}.tap do |doc|
-          for_all(:attribute_initializers) do |name, _|
+          for_all(:attributes) do |name, _|
             doc[".#{name}"] ||= {}
           end
         end
@@ -96,8 +100,8 @@ module ConfigMapper
         @required_attributes ||= []
       end
 
-      def attribute_initializers
-        @attribute_initializers ||= {}
+      def attributes
+        @attributes ||= {}
       end
 
       def declared_components
@@ -127,8 +131,8 @@ module ConfigMapper
     end
 
     def initialize
-      self.class.for_all(:attribute_initializers) do |name, initializer|
-        instance_variable_set("@#{name}", initializer.call)
+      self.class.for_all(:attributes) do |name, attribute|
+        instance_variable_set("@#{name}", attribute.initializer.call)
       end
     end
 
@@ -156,7 +160,7 @@ module ConfigMapper
     #
     def to_h
       {}.tap do |result|
-        self.class.for_all(:attribute_initializers) do |attr_name, _|
+        self.class.for_all(:attributes) do |attr_name, _|
           value = send(attr_name)
           if value && value.respond_to?(:to_h) && !value.is_a?(Array)
             value = value.to_h
@@ -208,6 +212,9 @@ module ConfigMapper
           end
         end
       end
+    end
+
+    class Attribute < Struct.new(:initializer)
     end
 
   end
