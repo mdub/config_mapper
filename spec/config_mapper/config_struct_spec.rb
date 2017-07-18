@@ -227,7 +227,6 @@ describe ConfigMapper::ConfigStruct do
     end
 
     it "returns type information, where known" do
-      pending
       expect(documentation.dig(".flavour")).to_not include("type")
       expect(documentation.dig(".scoops", "type")).to eql("Integer")
     end
