@@ -83,6 +83,13 @@ module ConfigMapper
         attr_reader(attribute.name)
       end
 
+      # Generate documentation, as Ruby data.
+      #
+      # Returns an entry for each configurable path, detailing
+      # `description`, `type`, and `default`.
+      #
+      # @return [Hash] documentation, keyed by path
+      #
       def documentation
         {}.tap do |doc|
           for_all(:attributes) do |attribute|

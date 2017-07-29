@@ -217,6 +217,10 @@ describe ConfigMapper::ConfigStruct do
     with_target_class do
       attribute :flavour
       attribute :scoops, Integer, default: 2
+      component :position do
+        attribute :x, Float
+        attribute :y, Float
+      end
     end
 
     let(:documentation) { target_class.documentation }
@@ -224,6 +228,12 @@ describe ConfigMapper::ConfigStruct do
     it "returns data for each attribute" do
       expect(documentation).to have_key(".flavour")
       expect(documentation).to have_key(".scoops")
+    end
+
+    it "returns data for components" do
+      pending
+      expect(documentation).to have_key(".position.x")
+      expect(documentation).to have_key(".position.y")
     end
 
     it "includes type information, where known" do
