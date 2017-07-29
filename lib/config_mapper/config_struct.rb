@@ -24,17 +24,14 @@ module ConfigMapper
       def attribute(name, type = nil, default: :no_default, &type_block)
         attribute = attribute!(name)
 
-        attribute.required = true
-        attribute.default = nil
-        unless default == :no_default
+        if default == :no_default
+          attribute.required = true
+        else
           attribute.default = default.freeze
-          attribute.required = false if attribute.default.nil?
         end
 
-        attribute.initializer = proc { attribute.default }
         attribute.validator = resolve_validator(type || type_block)
 
-        attr_reader(attribute.name)
         define_method("#{attribute.name}=") do |value|
           if value.nil?
             raise NoValueProvided if attribute.required
@@ -59,8 +56,7 @@ module ConfigMapper
         declared_components << attribute.name
         type = Class.new(type, &block) if block
         type = type.method(:new) if type.respond_to?(:new)
-        attribute.initializer = type
-        attr_reader(attribute.name)
+        attribute.factory = type
       end
 
       # Defines an associative array of sub-components.
@@ -76,11 +72,9 @@ module ConfigMapper
         attribute = attribute!(name)
         declared_component_dicts << attribute.name
         type = Class.new(type, &block) if block
-        type = type.method(:new) if type.respond_to?(:new)
-        attribute.initializer = lambda do
-          ConfigDict.new(type, resolve_validator(key_type))
+        attribute.factory = lambda do
+          ConfigDict.new(type.method(:new), resolve_validator(key_type))
         end
-        attr_reader(attribute.name)
       end
 
       # Generate documentation, as Ruby data.
@@ -93,14 +87,7 @@ module ConfigMapper
       def documentation
         {}.tap do |doc|
           for_all(:attributes) do |attribute|
-            doc[".#{attribute.name}"] = {}.tap do |attr_doc|
-              if attribute.default
-                attr_doc["default"] = attribute.default
-              end
-              if attribute.validator.respond_to?(:name)
-                attr_doc["type"] = String(attribute.validator.name)
-              end
-            end
+            doc[".#{attribute.name}"] = attribute.documentation
           end
         end
       end
@@ -110,6 +97,7 @@ module ConfigMapper
       end
 
       def attribute!(name)
+        attr_reader(name)
         attributes_by_name[name] ||= Attribute.new(name)
       end
 
@@ -149,7 +137,7 @@ module ConfigMapper
 
     def initialize
       self.class.for_all(:attributes) do |attribute|
-        instance_variable_set("@#{attribute.name}", attribute.initializer.call)
+        instance_variable_set("@#{attribute.name}", attribute.initial_value)
       end
     end
 
@@ -239,10 +227,26 @@ module ConfigMapper
 
       attr_reader :name
 
-      attr_accessor :initializer
+      attr_accessor :factory
       attr_accessor :validator
       attr_accessor :default
       attr_accessor :required
+
+      def initial_value
+        return factory.call if factory
+        default
+      end
+
+      def documentation
+        {}.tap do |doc|
+          if default
+            doc["default"] = default
+          end
+          if validator.respond_to?(:name)
+            doc["type"] = String(validator.name)
+          end
+        end
+      end
 
     end
 
