@@ -83,12 +83,8 @@ module ConfigMapper
       #
       # @return [Hash] documentation, keyed by path
       #
-      def documentation
-        {}.tap do |doc|
-          for_all(:attributes) do |attribute|
-            doc[".#{attribute.name}"] = attribute.documentation
-          end
-        end
+      def config_doc
+        for_all(:attributes).map(&:config_doc).inject({}, :merge)
       end
 
       def attributes_by_name
@@ -117,6 +113,7 @@ module ConfigMapper
       end
 
       def for_all(attribute, &action)
+        return enum_for(:for_all, attribute) unless action
         ancestors.each do |klass|
           next unless klass.respond_to?(attribute)
           klass.public_send(attribute).each(&action)
@@ -239,14 +236,29 @@ module ConfigMapper
         default
       end
 
-      def documentation
-        {}.tap do |doc|
-          if default
-            doc["default"] = default
+      def config_doc
+        self_doc.merge(type_doc)
+      end
+
+      private
+
+      def self_doc
+        {
+          ".#{name}" => {}.tap do |doc|
+            if default
+              doc["default"] = default
+            end
+            if validator.respond_to?(:name)
+              doc["type"] = String(validator.name)
+            end
           end
-          if validator.respond_to?(:name)
-            doc["type"] = String(validator.name)
-          end
+        }
+      end
+
+      def type_doc
+        return {} unless factory.respond_to?(:config_doc)
+        factory.config_doc.each_with_object({}) do |(path, doc), result|
+          result[".#{name}#{path}"] = doc
         end
       end
 

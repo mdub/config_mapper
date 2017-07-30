@@ -212,7 +212,7 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
-  describe ".documentation" do
+  describe ".config_doc" do
 
     with_target_class do
       attribute :flavour
@@ -223,27 +223,26 @@ describe ConfigMapper::ConfigStruct do
       end
     end
 
-    let(:documentation) { target_class.documentation }
+    let(:config_doc) { target_class.config_doc }
 
     it "returns data for each attribute" do
-      expect(documentation).to have_key(".flavour")
-      expect(documentation).to have_key(".scoops")
+      expect(config_doc).to have_key(".flavour")
+      expect(config_doc).to have_key(".scoops")
     end
 
     it "returns data for components" do
-      pending
-      expect(documentation).to have_key(".position.x")
-      expect(documentation).to have_key(".position.y")
+      expect(config_doc).to have_key(".position.x")
+      expect(config_doc).to have_key(".position.y")
     end
 
     it "includes type information, where known" do
-      expect(documentation.dig(".flavour")).to_not include("type")
-      expect(documentation.dig(".scoops", "type")).to eql("Integer")
+      expect(config_doc.dig(".flavour")).to_not include("type")
+      expect(config_doc.dig(".scoops", "type")).to eql("Integer")
     end
 
     it "returns defaults, where specified" do
-      expect(documentation.dig(".flavour")).to_not include("default")
-      expect(documentation.dig(".scoops", "default")).to eql(2)
+      expect(config_doc.dig(".flavour")).to_not include("default")
+      expect(config_doc.dig(".scoops", "default")).to eql(2)
     end
 
   end
