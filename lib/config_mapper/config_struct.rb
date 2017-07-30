@@ -55,7 +55,6 @@ module ConfigMapper
         attribute = attribute!(name)
         declared_components << attribute.name
         type = Class.new(type, &block) if block
-        type = type.method(:new) if type.respond_to?(:new)
         attribute.factory = type
       end
 
@@ -233,7 +232,10 @@ module ConfigMapper
       attr_accessor :required
 
       def initial_value
-        return factory.call if factory
+        if factory
+          return factory.new if factory.respond_to?(:new)
+          return factory.call
+        end
         default
       end
 
