@@ -48,8 +48,20 @@ module ConfigMapper
         @key_validator = key_validator
       end
 
+      attr_reader :entry_factory
+      attr_reader :key_validator
+
       def new
         ConfigDict.new(@entry_factory, @key_validator)
+      end
+
+      def config_doc
+        return {} unless entry_factory.respond_to?(:config_doc)
+        {}.tap do |result|
+          entry_factory.config_doc.each do |path, doc|
+            result["[X]#{path}"] = doc
+          end
+        end
       end
 
     end
