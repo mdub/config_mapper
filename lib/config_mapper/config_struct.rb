@@ -52,8 +52,8 @@ module ConfigMapper
       # @param type [Class] component base-class
       #
       def component(name, type: ConfigStruct, &block)
-        attribute = attribute!(name)
         type = Class.new(type, &block) if block
+        attribute = attribute!(name)
         attribute.factory = type
       end
 
@@ -67,11 +67,9 @@ module ConfigMapper
       # @param key_type [Proc] function used to validate keys
       #
       def component_dict(name, type: ConfigStruct, key_type: nil, &block)
-        attribute = attribute!(name)
         type = Class.new(type, &block) if block
-        attribute.factory = lambda do
-          ConfigDict.new(type.method(:new), resolve_validator(key_type))
-        end
+        key_validator = resolve_validator(key_type)
+        component(name, type: ConfigDict::Factory.new(type, key_validator))
       end
 
       # Generate documentation, as Ruby data.

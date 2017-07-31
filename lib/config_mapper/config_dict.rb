@@ -12,7 +12,7 @@ module ConfigMapper
 
     def [](key)
       key = @key_validator.call(key) if @key_validator
-      @entries[key] ||= @entry_factory.call
+      @entries[key] ||= @entry_factory.new
     end
 
     def to_h
@@ -40,6 +40,19 @@ module ConfigMapper
     def_delegators :@entries, :each, :empty?, :key?, :keys, :map, :size
 
     include Enumerable
+
+    class Factory
+
+      def initialize(entry_factory, key_validator)
+        @entry_factory = entry_factory
+        @key_validator = key_validator
+      end
+
+      def new
+        ConfigDict.new(@entry_factory, @key_validator)
+      end
+
+    end
 
   end
 
