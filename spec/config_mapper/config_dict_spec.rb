@@ -4,13 +4,9 @@ describe ConfigMapper::ConfigDict do
 
   let(:entry_class) { Struct.new(:x, :y) }
 
-  subject(:entry_type) do
-    lambda { entry_class.new }
-  end
-
   subject(:key_type) { nil }
 
-  subject(:dict) { ConfigMapper::ConfigDict.new(entry_type, key_type) }
+  subject(:dict) { ConfigMapper::ConfigDict.new(entry_class, key_type) }
 
   it "looks like a dictionary" do
     expect(dict).to respond_to(:[])
@@ -24,7 +20,7 @@ describe ConfigMapper::ConfigDict do
     expect(dict["foo"]).to_not be_nil
   end
 
-  it "invokes the entry_type Proc to generate new values" do
+  it "uses the entry_class to generate new values" do
     expect(dict["foo"]).to be_kind_of(entry_class)
   end
 
