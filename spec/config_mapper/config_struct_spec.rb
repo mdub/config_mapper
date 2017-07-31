@@ -221,6 +221,9 @@ describe ConfigMapper::ConfigStruct do
         attribute :x, Float
         attribute :y, Float
       end
+      component_dict :options do
+        attribute :name
+      end
     end
 
     let(:config_doc) { target_class.config_doc }
@@ -233,6 +236,10 @@ describe ConfigMapper::ConfigStruct do
     it "returns data for components" do
       expect(config_doc).to have_key(".position.x")
       expect(config_doc).to have_key(".position.y")
+    end
+
+    it "returns data for component_dicts" do
+      expect(config_doc).to have_key(".options[X].name")
     end
 
     it "includes type information, where known" do
