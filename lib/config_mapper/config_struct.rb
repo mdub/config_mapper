@@ -1,5 +1,7 @@
 require "config_mapper"
 require "config_mapper/config_dict"
+require "config_mapper/factory"
+require "config_mapper/validator"
 
 module ConfigMapper
 
@@ -32,7 +34,7 @@ module ConfigMapper
           attribute.default = default.freeze
         end
 
-        attribute.validator = resolve_validator(type || type_block)
+        attribute.validator = Validator.resolve(type || type_block)
 
         define_method("#{attribute.name}=") do |value|
           if value.nil?
@@ -71,8 +73,7 @@ module ConfigMapper
       #
       def component_dict(name, type: ConfigStruct, key_type: nil, description: nil, &block)
         type = Class.new(type, &block) if block
-        key_validator = resolve_validator(key_type)
-        component(name, type: ConfigDict::Factory.new(type, key_validator), description: description)
+        component(name, type: ConfigDict::Factory.new(type, key_type), description: description)
       end
 
       # Generate documentation, as Ruby data.
@@ -107,15 +108,6 @@ module ConfigMapper
       def attribute!(name)
         attr_reader(name)
         attributes_by_name[name] ||= Attribute.new(name)
-      end
-
-      def resolve_validator(validator)
-        return validator if validator.respond_to?(:call)
-        if validator.respond_to?(:name)
-          # looks like a primitive class -- find the corresponding coercion method
-          return Kernel.method(validator.name)
-        end
-        validator
       end
 
     end
@@ -215,11 +207,12 @@ module ConfigMapper
       attr_accessor :required
 
       def initial_value
-        if factory
-          return factory.new if factory.respond_to?(:new)
-          return factory.call
-        end
+        return factory.new if factory
         default
+      end
+
+      def factory=(arg)
+        @factory = Factory.resolve(arg)
       end
 
       def config_doc

@@ -1,8 +1,35 @@
+require "config_mapper/factory"
+require "config_mapper/validator"
 require "forwardable"
 
 module ConfigMapper
 
   class ConfigDict
+
+    class Factory
+
+      def initialize(entry_factory, key_validator)
+        @entry_factory = ConfigMapper::Factory.resolve(entry_factory)
+        @key_validator = ConfigMapper::Validator.resolve(key_validator)
+      end
+
+      attr_reader :entry_factory
+      attr_reader :key_validator
+
+      def new
+        ConfigDict.new(@entry_factory, @key_validator)
+      end
+
+      def config_doc
+        return {} unless entry_factory.respond_to?(:config_doc)
+        {}.tap do |result|
+          entry_factory.config_doc.each do |path, doc|
+            result["[X]#{path}"] = doc
+          end
+        end
+      end
+
+    end
 
     def initialize(entry_factory, key_validator = nil)
       @entry_factory = entry_factory
@@ -40,31 +67,6 @@ module ConfigMapper
     def_delegators :@entries, :each, :empty?, :key?, :keys, :map, :size
 
     include Enumerable
-
-    class Factory
-
-      def initialize(entry_factory, key_validator)
-        @entry_factory = entry_factory
-        @key_validator = key_validator
-      end
-
-      attr_reader :entry_factory
-      attr_reader :key_validator
-
-      def new
-        ConfigDict.new(@entry_factory, @key_validator)
-      end
-
-      def config_doc
-        return {} unless entry_factory.respond_to?(:config_doc)
-        {}.tap do |result|
-          entry_factory.config_doc.each do |path, doc|
-            result["[X]#{path}"] = doc
-          end
-        end
-      end
-
-    end
 
   end
 
