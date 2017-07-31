@@ -53,7 +53,6 @@ module ConfigMapper
       #
       def component(name, type: ConfigStruct, &block)
         attribute = attribute!(name)
-        declared_components << attribute.name
         type = Class.new(type, &block) if block
         attribute.factory = type
       end
@@ -69,7 +68,6 @@ module ConfigMapper
       #
       def component_dict(name, type: ConfigStruct, key_type: nil, &block)
         attribute = attribute!(name)
-        declared_component_dicts << attribute.name
         type = Class.new(type, &block) if block
         attribute.factory = lambda do
           ConfigDict.new(type.method(:new), resolve_validator(key_type))
@@ -84,8 +82,22 @@ module ConfigMapper
       # @return [Hash] documentation, keyed by path
       #
       def config_doc
-        for_all(:attributes).map(&:config_doc).inject({}, :merge)
+        each_attribute.map(&:config_doc).inject({}, :merge)
       end
+
+      def attributes
+        attributes_by_name.values
+      end
+
+      def each_attribute(&action)
+        return enum_for(:each_attribute) unless action
+        ancestors.each do |klass|
+          next unless klass.respond_to?(:attributes)
+          klass.attributes.each(&action)
+        end
+      end
+
+      private
 
       def attributes_by_name
         @attributes_by_name ||= {}
@@ -94,30 +106,6 @@ module ConfigMapper
       def attribute!(name)
         attr_reader(name)
         attributes_by_name[name] ||= Attribute.new(name)
-      end
-
-      def attributes
-        attributes_by_name.values
-      end
-
-      def required_attributes
-        attributes.select(&:required).map(&:name)
-      end
-
-      def declared_components
-        @declared_components ||= []
-      end
-
-      def declared_component_dicts
-        @declared_component_dicts ||= []
-      end
-
-      def for_all(attribute, &action)
-        return enum_for(:for_all, attribute) unless action
-        ancestors.each do |klass|
-          next unless klass.respond_to?(attribute)
-          klass.public_send(attribute).each(&action)
-        end
       end
 
       def resolve_validator(validator)
@@ -132,7 +120,7 @@ module ConfigMapper
     end
 
     def initialize
-      self.class.for_all(:attributes) do |attribute|
+      self.class.each_attribute do |attribute|
         instance_variable_set("@#{attribute.name}", attribute.initial_value)
       end
     end
@@ -161,7 +149,7 @@ module ConfigMapper
     #
     def to_h
       {}.tap do |result|
-        self.class.for_all(:attributes) do |attribute|
+        self.class.each_attribute do |attribute|
           value = send(attribute.name)
           if value && value.respond_to?(:to_h) && !value.is_a?(Array)
             value = value.to_h
@@ -175,13 +163,9 @@ module ConfigMapper
 
     def components
       {}.tap do |result|
-        self.class.for_all(:declared_components) do |name|
-          result[".#{name}"] = instance_variable_get("@#{name}")
-        end
-        self.class.for_all(:declared_component_dicts) do |name|
-          instance_variable_get("@#{name}").each do |key, value|
-            result[".#{name}[#{key.inspect}]"] = value
-          end
+        self.class.each_attribute do |a|
+          next unless a.factory
+          result[".#{a.name}"] = instance_variable_get("@#{a.name}")
         end
       end
     end
@@ -196,9 +180,9 @@ module ConfigMapper
 
     def missing_required_attribute_errors
       {}.tap do |errors|
-        self.class.for_all(:required_attributes) do |name|
-          if instance_variable_get("@#{name}").nil?
-            errors[".#{name}"] = NoValueProvided.new
+        self.class.each_attribute do |a|
+          if a.required && instance_variable_get("@#{a.name}").nil?
+            errors[".#{a.name}"] = NoValueProvided.new
           end
         end
       end
@@ -206,10 +190,10 @@ module ConfigMapper
 
     def component_config_errors
       {}.tap do |errors|
-        components.each do |component_name, component_value|
+        components.each do |component_path, component_value|
           next unless component_value.respond_to?(:config_errors)
-          component_value.config_errors.each do |key, value|
-            errors["#{component_name}#{key}"] = value
+          component_value.config_errors.each do |path, value|
+            errors["#{component_path}#{path}"] = value
           end
         end
       end
@@ -245,12 +229,8 @@ module ConfigMapper
       def self_doc
         {
           ".#{name}" => {}.tap do |doc|
-            if default
-              doc["default"] = default
-            end
-            if validator.respond_to?(:name)
-              doc["type"] = String(validator.name)
-            end
+            doc["default"] = default if default
+            doc["type"] = String(validator.name) if validator.respond_to?(:name)
           end
         }
       end
