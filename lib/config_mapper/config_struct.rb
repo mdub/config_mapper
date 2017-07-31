@@ -21,8 +21,10 @@ module ConfigMapper
       # @param default default value
       # @yield type-coercion block
       #
-      def attribute(name, type = nil, default: :no_default, &type_block)
+      def attribute(name, type = nil, default: :no_default, description: nil, &type_block)
+
         attribute = attribute!(name)
+        attribute.description = description
 
         if default == :no_default
           attribute.required = true
@@ -51,9 +53,10 @@ module ConfigMapper
       # @param name [Symbol] component name
       # @param type [Class] component base-class
       #
-      def component(name, type: ConfigStruct, &block)
+      def component(name, type: ConfigStruct, description: nil, &block)
         type = Class.new(type, &block) if block
         attribute = attribute!(name)
+        attribute.description = description
         attribute.factory = type
       end
 
@@ -66,10 +69,10 @@ module ConfigMapper
       # @param type [Class] base-class for component values
       # @param key_type [Proc] function used to validate keys
       #
-      def component_dict(name, type: ConfigStruct, key_type: nil, &block)
+      def component_dict(name, type: ConfigStruct, key_type: nil, description: nil, &block)
         type = Class.new(type, &block) if block
         key_validator = resolve_validator(key_type)
-        component(name, type: ConfigDict::Factory.new(type, key_validator))
+        component(name, type: ConfigDict::Factory.new(type, key_validator), description: description)
       end
 
       # Generate documentation, as Ruby data.
@@ -205,6 +208,7 @@ module ConfigMapper
 
       attr_reader :name
 
+      attr_accessor :description
       attr_accessor :factory
       attr_accessor :validator
       attr_accessor :default
@@ -227,6 +231,7 @@ module ConfigMapper
       def self_doc
         {
           ".#{name}" => {}.tap do |doc|
+            doc["description"] = description if description
             doc["default"] = default if default
             doc["type"] = String(validator.name) if validator.respond_to?(:name)
           end

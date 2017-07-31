@@ -215,9 +215,9 @@ describe ConfigMapper::ConfigStruct do
   describe ".config_doc" do
 
     with_target_class do
-      attribute :flavour
+      attribute :flavour, description: "Chosen flavour"
       attribute :scoops, Integer, default: 2
-      component :position do
+      component :position, description: "Where it's at" do
         attribute :x, Float
         attribute :y, Float
       end
@@ -250,6 +250,12 @@ describe ConfigMapper::ConfigStruct do
     it "returns defaults, where specified" do
       expect(config_doc.dig(".flavour")).to_not include("default")
       expect(config_doc.dig(".scoops", "default")).to eql(2)
+    end
+
+    it "includes descriptions, where specified" do
+      expect(config_doc.dig(".flavour", "description")).to eql("Chosen flavour")
+      expect(config_doc.dig(".position", "description")).to eql("Where it's at")
+      expect(config_doc.dig(".scoops")).to_not include("description")
     end
 
   end
