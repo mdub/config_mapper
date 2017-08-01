@@ -258,6 +258,11 @@ describe ConfigMapper::ConfigStruct do
       expect(config_doc.dig(".scoops")).to_not include("description")
     end
 
+    it "sorts the keys" do
+      doc_keys = config_doc.keys
+      expect(doc_keys).to eql(doc_keys.sort)
+    end
+
   end
 
   describe "#config_errors" do

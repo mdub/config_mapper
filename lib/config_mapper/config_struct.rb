@@ -84,7 +84,7 @@ module ConfigMapper
       # @return [Hash] documentation, keyed by path
       #
       def config_doc
-        each_attribute.map(&:config_doc).inject({}, :merge)
+        each_attribute.sort_by(&:name).map(&:config_doc).inject({}, :merge)
       end
 
       def attributes
