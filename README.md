@@ -246,6 +246,12 @@ state.configure_with(data)
 #=> }
 ```
 
+`ConfigStruct.from_data` instantiates an object from data, raising an exception if errors are encountered:
+
+```ruby
+state = State.from_data(data)
+```
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
