@@ -332,6 +332,69 @@ describe ConfigMapper::ConfigStruct do
 
   end
 
+  describe ".from_data" do
+
+    with_target_class do
+      attribute(:shape)
+      attribute(:size) { |arg| Integer(arg) }
+    end
+
+    def instantiate_from_data
+      target_class.from_data(data)
+    end
+
+    context "with valid data" do
+
+      let(:data) do
+        {
+          :shape => "square",
+          :size => "3"
+        }
+      end
+
+      let(:instance) { instantiate_from_data }
+
+      it "sets attributes" do
+        expect(instance.shape).to eql("square")
+        expect(instance.size).to eql(3)
+      end
+
+    end
+
+    context "with invalid data" do
+
+      let(:data) do
+        {
+          :size => "free"
+        }
+      end
+
+      it "raises an expection" do
+        expect { instantiate_from_data }.to raise_error(ConfigMapper::MappingError)
+      end
+
+      let(:errors_by_field) do
+        begin
+          instantiate_from_data
+        rescue ConfigMapper::MappingError => e
+          e.errors_by_field
+        end
+      end
+
+      it "returns marshalling errors" do
+        expect(errors_by_field.keys).to include(".size")
+        expect(errors_by_field[".size"]).to be_an(ArgumentError)
+      end
+
+      it "returns config_errors" do
+        expect(errors_by_field.keys).to include(".shape")
+        expect(errors_by_field[".shape"].to_s).to eql("no value provided")
+      end
+
+    end
+
+  end
+
   describe "#to_h" do
 
     with_target_class do

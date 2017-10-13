@@ -1,6 +1,7 @@
 require "config_mapper"
 require "config_mapper/config_dict"
 require "config_mapper/factory"
+require "config_mapper/mapping_error"
 require "config_mapper/validator"
 
 module ConfigMapper
@@ -10,6 +11,18 @@ module ConfigMapper
   class ConfigStruct
 
     class << self
+
+      # Instantiate from data.
+      #
+      # @param attribute_values [Hash] attribute values
+      # @raise [ConfigMapper::MappingError] on error
+      #
+      def from_data(attribute_values)
+        new.tap do |instance|
+          errors = instance.configure_with(attribute_values)
+          raise MappingError, errors if errors.any?
+        end
+      end
 
       # Defines reader and writer methods for the specified attribute.
       #
