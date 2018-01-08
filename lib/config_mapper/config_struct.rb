@@ -89,6 +89,19 @@ module ConfigMapper
         component(name, type: ConfigDict::Factory.new(type, key_type), description: description)
       end
 
+      # Defines an array of sub-components.
+      #
+      # If a block is be provided, it will be `class_eval`ed to define the
+      # sub-components class.
+      #
+      # @param name [Symbol] list attribute name
+      # @param type [Class] base-class for component values
+      #
+      def component_list(name, type: ConfigStruct, description: nil, &block)
+        type = Class.new(type, &block) if block
+        component(name, type: ConfigList::Factory.new(type), description: description)
+      end
+
       # Generate documentation, as Ruby data.
       #
       # Returns an entry for each configurable path, detailing
@@ -159,6 +172,8 @@ module ConfigMapper
           value = send(attribute.name)
           if value && value.respond_to?(:to_h) && !value.is_a?(Array)
             value = value.to_h
+          elsif value && value.respond_to?(:to_a)
+            value = value.to_a
           end
           result[attribute.name.to_s] = value
         end

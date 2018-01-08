@@ -5,13 +5,6 @@ require "config_mapper/validator"
 require "forwardable"
 
 module ConfigMapper
-  class ConfigStruct
-    def self.component_list(name, type: ConfigStruct, description: nil, &block)
-      type = Class.new(type, &block) if block
-      component(name, type: ConfigList::Factory.new(type), description: description)
-    end
-  end
-
   class ConfigList
 
     class Factory
@@ -55,9 +48,6 @@ module ConfigMapper
         end
       end
     end
-
-    # TODO: ConfigStruct#to_h needs to call to_a when something looks like an array
-    def to_h; to_a end
 
     def config_errors
       {}.tap do |errors|
