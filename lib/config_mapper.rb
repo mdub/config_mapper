@@ -1,5 +1,6 @@
 require "config_mapper/collection_mapper"
 require "config_mapper/config_dict"
+require "config_mapper/config_list"
 require "config_mapper/object_mapper"
 
 # Supports marshalling of plain-old data (e.g. loaded from
