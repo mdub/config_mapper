@@ -1,6 +1,6 @@
-require "config_mapper/config_dict"
+require "config_mapper/config_list"
 
-describe ConfigMapper::ConfigDict do
+describe ConfigMapper::ConfigList do
 
   let(:entry_class) { Struct.new(:x, :y) }
 
