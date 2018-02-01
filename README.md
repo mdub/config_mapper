@@ -217,6 +217,30 @@ class State < ConfigMapper::ConfigStruct
 end
 ```
 
+`component_list` declares a nested list of configurable objects, indexed by position, and `component_dict` declares a dictionary (map) of configurable objects, indexed by an arbitrary key.
+
+```ruby
+class Polygon < ConfigMapper::ConfigStruct
+
+  component_list :points do
+    attribute :x
+    attribute :y
+  end
+
+end
+
+class Cargo < ConfigMapper::ConfigStruct
+
+  component_dict :packages do
+    attribute :contents
+    attribute :weight, Float
+  end
+
+end
+```
+
+In both cases, new collection entries pop into existance the first time they are accessed.
+
 ### Semantic errors
 
 `ConfigStruct#config_errors` returns errors for each unset mandatory attribute.
