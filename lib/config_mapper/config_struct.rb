@@ -170,7 +170,7 @@ module ConfigMapper
       {}.tap do |result|
         self.class.each_attribute do |attribute|
           value = send(attribute.name)
-          if value && value.respond_to?(:to_h) && !value.is_a?(Array)
+          if value && value.respond_to?(:to_h) && !value.is_a?(Array) && !value.is_a?(ConfigList)
             value = value.to_h
           elsif value && value.respond_to?(:to_a)
             value = value.to_a

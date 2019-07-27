@@ -486,6 +486,9 @@ describe ConfigMapper::ConfigStruct do
       component_dict :services do
         attribute :port
       end
+      component_list :aliases do
+        attribute :alias
+      end
       attribute :words
     end
 
@@ -517,6 +520,22 @@ describe ConfigMapper::ConfigStruct do
             "port" => 5678
           }
         }
+      }
+      expect(target.to_h).to include(expected)
+    end
+
+    it "includes component_lists" do
+      target.aliases[0].alias = "fred"
+      target.aliases[1].alias = "jane"
+      expected = {
+        "aliases" => [
+          {
+            "alias" => "fred"
+          },
+          {
+            "alias" => "jane"
+          }
+        ]
       }
       expect(target.to_h).to include(expected)
     end
