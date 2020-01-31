@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "config_mapper/mapper"
 
 module ConfigMapper
@@ -22,7 +24,7 @@ module ConfigMapper
       @hash[key] = value
     end
 
-    def can_set?(key)
+    def can_set?(_key)
       @hash.respond_to?("[]=")
     end
 

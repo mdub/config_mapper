@@ -1,4 +1,6 @@
-lib = File.expand_path("../lib", __FILE__)
+# frozen_string_literal: true
+
+lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "config_mapper/version"
 
@@ -14,10 +16,10 @@ Gem::Specification.new do |spec|
   spec.email         = ["mdub@dogbiscuit.org"]
   spec.homepage      = "https://github.com/mdub/config_mapper"
 
-  spec.files         = Dir.glob("lib/**/*") + %w(README.md LICENSE.txt)
+  spec.files         = Dir.glob("lib/**/*") + %w[README.md LICENSE.txt]
   spec.require_paths = ["lib"]
 
-  spec.required_ruby_version = '>= 2.0'
+  spec.required_ruby_version = ">= 2.5"
 
   spec.add_development_dependency "bundler", "~> 2.1"
   spec.add_development_dependency "rake", "~> 12.0"

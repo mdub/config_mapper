@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "config_mapper"
 
 module Testy
@@ -20,7 +22,7 @@ module Testy
   class State
 
     def initialize
-      @position ||= Position.new
+      @position = Position.new
     end
 
     attr_reader :position
@@ -89,7 +91,7 @@ describe ConfigMapper, ".configure_with" do
     context "with an array" do
 
       let(:source_data) do
-        %w(a b c)
+        %w[a b c]
       end
 
       it "records NoMethodErrors for array indices" do

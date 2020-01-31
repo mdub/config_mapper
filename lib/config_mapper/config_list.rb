@@ -1,5 +1,7 @@
-require 'config_mapper'
-require 'config_mapper/config_struct'
+# frozen_string_literal: true
+
+require "config_mapper"
+require "config_mapper/config_struct"
 require "config_mapper/factory"
 require "config_mapper/validator"
 require "forwardable"
@@ -21,6 +23,7 @@ module ConfigMapper
 
       def config_doc
         return {} unless entry_factory.respond_to?(:config_doc)
+
         {}.tap do |result|
           entry_factory.config_doc.each do |path, doc|
             result["[N]#{path}"] = doc
@@ -41,10 +44,9 @@ module ConfigMapper
 
     def to_a
       map do |element|
-        case
-          when element.respond_to?(:to_h); element.to_h
-          when element.respond_to?(:to_a); element.to_a
-          else element
+        if element.respond_to?(:to_h) then element.to_h
+        elsif element.respond_to?(:to_a) then element.to_a
+        else element
         end
       end
     end
@@ -53,6 +55,7 @@ module ConfigMapper
       {}.tap do |errors|
         each_with_index do |element, index|
           next unless element.respond_to?(:config_errors)
+
           prefix = "[#{index}]"
           element.config_errors.each do |path, path_errors|
             errors["#{prefix}#{path}"] = path_errors
@@ -69,4 +72,3 @@ module ConfigMapper
 
   end
 end
-

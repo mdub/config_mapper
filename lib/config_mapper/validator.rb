@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ConfigMapper
 
   module Validator
@@ -8,6 +10,7 @@ module ConfigMapper
         # looks like a primitive class -- find the corresponding coercion method
         return Kernel.method(arg.name)
       end
+
       arg
     end
 

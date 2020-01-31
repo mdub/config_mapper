@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "bigdecimal"
 require "config_mapper/config_struct"
 
@@ -12,7 +14,7 @@ module Testz
 
   class Library < ConfigMapper::ConfigStruct
 
-    component_list :books, type: Book
+    component_list :books, :type => Book
 
   end
 
@@ -63,11 +65,9 @@ describe ConfigMapper::ConfigStruct do
     context "with a type" do
 
       case_insensitive_string = ->(arg) do
-        if arg.respond_to?(:upcase)
-          arg.upcase
-        else
-          raise ArgumentError, "not a String"
-        end
+        raise ArgumentError, "not a String" unless arg.respond_to?(:upcase)
+
+        arg.upcase
       end
 
       with_target_class do
@@ -201,45 +201,45 @@ describe ConfigMapper::ConfigStruct do
 
     it "can be configured" do
       config_data = {
-          "books" => [
-              {
-                  "title" => "4321",
-                  "author" => "Paul Auster"
-              },
-              {
-                  "title" => "Sapiens : A Brief History of Humankind",
-                  "author" => "Yuval Noah Harari"
-              }
-          ]
+        "books" => [
+          {
+            "title" => "4321",
+            "author" => "Paul Auster"
+          },
+          {
+            "title" => "Sapiens : A Brief History of Humankind",
+            "author" => "Yuval Noah Harari"
+          }
+        ]
       }
 
       errors = target.configure_with(config_data)
       expect(errors).to be_empty
-      expect(target.books.map { |b| b.title }).to eq(["4321", "Sapiens : A Brief History of Humankind"])
+      expect(target.books.map(&:title)).to eq(["4321", "Sapiens : A Brief History of Humankind"])
     end
 
     context "nested within a class" do
 
-      let (:target_class) { Class.new(Testz::Library)}
+      let(:target_class) { Class.new(Testz::Library) }
 
       it "can be configured" do
         config_data = {
-            "books" => [
-                {
-                    "title" => "4321",
-                    "author" => "Paul Auster"
-                },
-                {
-                    "title" => "Sapiens : A Brief History of Humankind",
-                    "author" => "Yuval Noah Harari"
-                }
-            ]
+          "books" => [
+            {
+              "title" => "4321",
+              "author" => "Paul Auster"
+            },
+            {
+              "title" => "Sapiens : A Brief History of Humankind",
+              "author" => "Yuval Noah Harari"
+            }
+          ]
         }
 
         errors = target.configure_with(config_data)
         expect(errors).to be_empty
         expect(target.books).to all(be_a(Testz::Book))
-        expect(target.books.map { |b| b.title }).to eq(["4321", "Sapiens : A Brief History of Humankind"])
+        expect(target.books.map(&:title)).to eq(["4321", "Sapiens : A Brief History of Humankind"])
       end
     end
   end
@@ -294,9 +294,9 @@ describe ConfigMapper::ConfigStruct do
   describe ".config_doc" do
 
     with_target_class do
-      attribute :flavour, description: "Chosen flavour"
-      attribute :scoops, Integer, default: 2
-      component :position, description: "Where it's at" do
+      attribute :flavour, :description => "Chosen flavour"
+      attribute :scoops, Integer, :default => 2
+      component :position, :description => "Where it's at" do
         attribute :x, Float
         attribute :y, Float
       end
@@ -453,11 +453,11 @@ describe ConfigMapper::ConfigStruct do
       end
 
       let(:errors_by_field) do
-        begin
-          instantiate_from_data
-        rescue ConfigMapper::MappingError => e
-          e.errors_by_field
-        end
+
+        instantiate_from_data
+      rescue ConfigMapper::MappingError => e
+        e.errors_by_field
+
       end
 
       it "returns marshalling errors" do

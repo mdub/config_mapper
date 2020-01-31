@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "config_mapper"
 require "config_mapper/config_dict"
 require "config_mapper/factory"
@@ -36,8 +38,7 @@ module ConfigMapper
       # @param default default value
       # @yield type-coercion block
       #
-      def attribute(name, type = nil, default: :no_default, description: nil, &type_block)
-
+      def attribute(name, type = nil, default: :no_default, description: nil, &type_block) # rubocop:disable Metrics/PerceivedComplexity
         attribute = attribute!(name)
         attribute.description = description
 
@@ -52,12 +53,11 @@ module ConfigMapper
         define_method("#{attribute.name}=") do |value|
           if value.nil?
             raise NoValueProvided if attribute.required
-          else
-            value = attribute.validator.call(value) if attribute.validator
+          elsif attribute.validator
+            value = attribute.validator.call(value)
           end
           instance_variable_set("@#{attribute.name}", value)
         end
-
       end
 
       # Defines a sub-component.
@@ -86,7 +86,7 @@ module ConfigMapper
       #
       def component_dict(name, type: ConfigStruct, key_type: nil, description: nil, &block)
         type = Class.new(type, &block) if block
-        component(name, type: ConfigDict::Factory.new(type, key_type), description: description)
+        component(name, :type => ConfigDict::Factory.new(type, key_type), :description => description)
       end
 
       # Defines an array of sub-components.
@@ -99,7 +99,7 @@ module ConfigMapper
       #
       def component_list(name, type: ConfigStruct, description: nil, &block)
         type = Class.new(type, &block) if block
-        component(name, type: ConfigList::Factory.new(type), description: description)
+        component(name, :type => ConfigList::Factory.new(type), :description => description)
       end
 
       # Generate documentation, as Ruby data.
@@ -119,8 +119,10 @@ module ConfigMapper
 
       def each_attribute(&action)
         return enum_for(:each_attribute) unless action
+
         ancestors.each do |klass|
           next unless klass.respond_to?(:attributes)
+
           klass.attributes.each(&action)
         end
       end
@@ -170,9 +172,9 @@ module ConfigMapper
       {}.tap do |result|
         self.class.each_attribute do |attribute|
           value = send(attribute.name)
-          if value && value.respond_to?(:to_h) && !value.is_a?(Array) && !value.is_a?(ConfigList)
+          if value&.respond_to?(:to_h) && !value.is_a?(Array) && !value.is_a?(ConfigList)
             value = value.to_h
-          elsif value && value.respond_to?(:to_a)
+          elsif value&.respond_to?(:to_a)
             value = value.to_a
           end
           result[attribute.name.to_s] = value
@@ -186,6 +188,7 @@ module ConfigMapper
       {}.tap do |result|
         self.class.each_attribute do |a|
           next unless a.factory
+
           result[".#{a.name}"] = instance_variable_get("@#{a.name}")
         end
       end
@@ -202,9 +205,7 @@ module ConfigMapper
     def missing_required_attribute_errors
       {}.tap do |errors|
         self.class.each_attribute do |a|
-          if a.required && instance_variable_get("@#{a.name}").nil?
-            errors[".#{a.name}"] = NoValueProvided.new
-          end
+          errors[".#{a.name}"] = NoValueProvided.new if a.required && instance_variable_get("@#{a.name}").nil?
         end
       end
     end
@@ -213,6 +214,7 @@ module ConfigMapper
       {}.tap do |errors|
         components.each do |component_path, component_value|
           next unless component_value.respond_to?(:config_errors)
+
           component_value.config_errors.each do |path, value|
             errors["#{component_path}#{path}"] = value
           end
@@ -227,15 +229,16 @@ module ConfigMapper
       end
 
       attr_reader :name
+      attr_reader :factory
 
       attr_accessor :description
-      attr_accessor :factory
       attr_accessor :validator
       attr_accessor :default
       attr_accessor :required
 
       def initial_value
         return factory.new if factory
+
         default
       end
 
@@ -261,6 +264,7 @@ module ConfigMapper
 
       def type_doc
         return {} unless factory.respond_to?(:config_doc)
+
         factory.config_doc.each_with_object({}) do |(path, doc), result|
           result[".#{name}#{path}"] = doc
         end

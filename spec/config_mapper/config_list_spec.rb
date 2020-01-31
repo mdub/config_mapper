@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "config_mapper/config_list"
 
 describe ConfigMapper::ConfigList do

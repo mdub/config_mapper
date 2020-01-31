@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "config_mapper/factory"
 require "config_mapper/validator"
 require "forwardable"
@@ -22,6 +24,7 @@ module ConfigMapper
 
       def config_doc
         return {} unless entry_factory.respond_to?(:config_doc)
+
         {}.tap do |result|
           entry_factory.config_doc.each do |path, doc|
             result["[X]#{path}"] = doc
@@ -55,6 +58,7 @@ module ConfigMapper
         each do |key, value|
           prefix = "[#{key.inspect}]"
           next unless value.respond_to?(:config_errors)
+
           value.config_errors.each do |path, path_errors|
             errors["#{prefix}#{path}"] = path_errors
           end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ConfigMapper
 
   # Thrown to indicate a problem parsing config.
@@ -16,7 +18,7 @@ module ConfigMapper
     def generate_message
       result = "configuration error"
       errors_by_field.each do |field, error|
-        result << "\n  #{field[1..-1]} - #{error}"
+        result += "\n  #{field[1..-1]} - #{error}"
       end
       result
     end
