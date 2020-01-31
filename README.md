@@ -72,21 +72,6 @@ state.orientation              #=> "North"
 state.position.x               #=> 2
 ```
 
-It can even populate Hashes of objects, e.g.
-
-```ruby
-positions = Hash.new { |h,k| h[k] = Position.new }
-
-config_data = {
-  "fred" => { "x" => 2, "y" => 4 },
-  "mary" => { "x" => 3, "y" => 5 }
-}
-
-ConfigMapper.configure_with(config_data, positions)
-positions["fred"].x            #=> 2
-positions["mary"].y            #=> 5
-```
-
 ### Target object
 
 Given
@@ -134,7 +119,7 @@ makes it even easier to declare configuration data-structures.
 
 ### Attributes
 
-The `attribute` method is similar to `attr_accessor`, defining both reader and writer methods for the named attribute.   
+The `attribute` method is similar to `attr_accessor`, defining both reader and writer methods for the named attribute.
 
 ```ruby
 require "config_mapper/config_struct"
@@ -204,7 +189,7 @@ Specify a default value of `nil` to mark an attribute as optional. Attributes wi
 
 ### Sub-components
 
-The `component` method defines a nested component object, itself a `ConfigStruct`.  
+The `component` method defines a nested component object, itself a `ConfigStruct`.
 
 ```ruby
 class State < ConfigMapper::ConfigStruct
@@ -217,7 +202,7 @@ class State < ConfigMapper::ConfigStruct
 end
 ```
 
-`component_list` declares a nested list of configurable objects, indexed by position, and `component_dict` declares a dictionary (map) of configurable objects, indexed by an arbitrary key.
+`component_list` declares a nested list of configurable objects, indexed by position.
 
 ```ruby
 class Polygon < ConfigMapper::ConfigStruct
@@ -229,6 +214,11 @@ class Polygon < ConfigMapper::ConfigStruct
 
 end
 
+```
+
+`component_dict` declares a dictionary (map) of configurable objects, indexed by an arbitrary key.
+
+```ruby
 class Cargo < ConfigMapper::ConfigStruct
 
   component_dict :packages do
