@@ -1,6 +1,23 @@
 require "bigdecimal"
 require "config_mapper/config_struct"
 
+module Testz
+
+  class Book < ConfigMapper::ConfigStruct
+
+    attribute :title
+    attribute :author
+
+  end
+
+  class Library < ConfigMapper::ConfigStruct
+
+    component_list :books, type: Book
+
+  end
+
+end
+
 describe ConfigMapper::ConfigStruct do
 
   def self.with_target_class(&block)
@@ -163,6 +180,68 @@ describe ConfigMapper::ConfigStruct do
 
     end
 
+  end
+
+  describe ".component_list" do
+
+    with_target_class do
+      component_list :books do
+        attribute :title
+        attribute :author
+      end
+    end
+
+    it "declares a List-like component" do
+      expect(target.books).to be_a(ConfigMapper::ConfigList)
+    end
+
+    it "defines an element-type" do
+      expect(target.books[0]).to respond_to(:title)
+    end
+
+    it "can be configured" do
+      config_data = {
+          "books" => [
+              {
+                  "title" => "4321",
+                  "author" => "Paul Auster"
+              },
+              {
+                  "title" => "Sapiens : A Brief History of Humankind",
+                  "author" => "Yuval Noah Harari"
+              }
+          ]
+      }
+
+      errors = target.configure_with(config_data)
+      expect(errors).to be_empty
+      expect(target.books.map { |b| b.title }).to eq(["4321", "Sapiens : A Brief History of Humankind"])
+    end
+
+    context "nested within a class" do
+
+      let (:target_class) { Class.new(Testz::Library)}
+
+      it "can be configured" do
+        config_data = {
+            "books" => [
+                {
+                    "title" => "4321",
+                    "author" => "Paul Auster"
+                },
+                {
+                    "title" => "Sapiens : A Brief History of Humankind",
+                    "author" => "Yuval Noah Harari"
+                }
+            ]
+        }
+
+        errors = target.configure_with(config_data)
+        expect(errors).to be_empty
+        expect(target.books).to all(be_a(Testz::Book))
+        expect(target.books.map { |b| b.title }).to eq(["4321", "Sapiens : A Brief History of Humankind"])
+      end
+    end
   end
 
   describe ".component_dict" do
@@ -407,6 +486,9 @@ describe ConfigMapper::ConfigStruct do
       component_dict :services do
         attribute :port
       end
+      component_list :aliases do
+        attribute :alias
+      end
       attribute :words
     end
 
@@ -442,6 +524,22 @@ describe ConfigMapper::ConfigStruct do
       expect(target.to_h).to include(expected)
     end
 
+    it "includes component_lists" do
+      target.aliases[0].alias = "fred"
+      target.aliases[1].alias = "jane"
+      expected = {
+        "aliases" => [
+          {
+            "alias" => "fred"
+          },
+          {
+            "alias" => "jane"
+          }
+        ]
+      }
+      expect(target.to_h).to include(expected)
+    end
+
     it "does sensible things with arrays" do
       target.words = ["blah"]
       expected = {
@@ -449,6 +547,7 @@ describe ConfigMapper::ConfigStruct do
       }
       expect(target.to_h).to include(expected)
     end
+
   end
 
   describe "sub-class" do
