@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.files         = Dir.glob("lib/**/*") + %w[README.md LICENSE.txt]
   spec.require_paths = ["lib"]
 
-  spec.required_ruby_version = ">= 2.5"
+  spec.required_ruby_version = ">= 2.7"
 
   spec.add_development_dependency "bundler", "~> 2.2"
   spec.add_development_dependency "rake", "~> 13.0"
